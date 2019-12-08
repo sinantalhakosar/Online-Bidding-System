@@ -155,13 +155,13 @@ class SellItem:
         self.itemtype = itemtype
         self.description = description
         self.bidtype = bidtype
-        self.starting = starting
-        self.minbid = minbid
+        self.starting = int(starting)
+        self.minbid = int(minbid)
         self.image = image
         self.stopbid = 0
         self.currentbid = 0
         self.lastbidder = ""
-        self.decremented = starting
+        self.decremented = int(starting)
         if(not bring):
             itemtosave = self.__dict__
             item_collection.insert_one(itemtosave)
