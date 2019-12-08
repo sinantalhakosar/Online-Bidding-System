@@ -56,8 +56,10 @@ def threaded(c, user, address):
             func_Array = func_Name.split(" ")
             if func_Array[0] == 'user':
                 if func_Array[1] == 'watch':
-                    start_new_thread(watchhelper, (au.User.watch(
-                        func_Array[2]), "user", serverAddressPort,))
+                    if len(func_Array) == 2:
+                        start_new_thread(watchhelper, (au.User.watch(), "user", serverAddressPort,))
+                    else:
+                        start_new_thread(watchhelper, (au.User.watch(func_Array[2]), "user", serverAddressPort,))
                 else:
                     func = getattr(user, func_Array[1])(*func_Array[2:])
                     c.send(pickle.dumps(func))
@@ -119,7 +121,7 @@ while True:
         user = au.User.getUser(data.decode('ascii'))
         if user is not None:
             try:
-                start_new_thread(threaded, (c, user, address[1]))
+                start_new_thread(threaded, (c, user, address[1],))
                 break
             except:
                 print("Unable to open thread")
@@ -132,7 +134,8 @@ while True:
                 continue
             newuserclass = au.User(
                 newuser[1], newuser[2], newuser[3], newuser[4])
-            start_new_thread(threaded, (c, newuserclass,))
+            start_new_thread(threaded, (c, newuserclass,address[1],))
+            break
 
 
 s.close()
