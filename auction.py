@@ -207,7 +207,7 @@ class SellItem:
 
     # User bids the amount for the item. Auction should be active and users should have a corressponding balance. Users balance is reserved by this amount. He/she cannot spend it until bid is complete. If there is a previous bid, it is updated.
     def bid(self, user, stramount):
-        amount = int(amount)
+        amount = int(stramount)
         if(self.state == "active"):
             dbuser = user_collection.find_one({"email": user})
             if (dbuser):
