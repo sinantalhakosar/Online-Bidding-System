@@ -194,15 +194,15 @@ class SellItem:
                 {"owner": self.owner, "title": self.title}, {"$set": {"state": "active"}})
             return {1:"The auction had started"}
         else:
-            if(stopbid < self.minbid):
+            if(int(stopbid) < self.minbid):
                 return {1:"Stop bid can not be less than min bid"}
             else:
                 if(self.bidtype == "decrement"):
                     _thread.start_new_thread(decrementer,())
                 self.state = "active"
-                self.stopbid = stopbid
+                self.stopbid = int(stopbid)
                 item = item_collection.find_one_and_update(
-                    {"owner": self.owner, "title": self.title}, {"$set": {"state": "active", "stopbid": stopbid}})
+                    {"owner": self.owner, "title": self.title}, {"$set": {"state": "active", "stopbid": self.stopbid}})
                 return {1:"The auction had started"}
 
     # User bids the amount for the item. Auction should be active and users should have a corressponding balance. Users balance is reserved by this amount. He/she cannot spend it until bid is complete. If there is a previous bid, it is updated.
