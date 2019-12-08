@@ -69,8 +69,8 @@ def threaded(c, user, address):
                                 func_Array[4], func_Array[5], func_Array[6], func_Array[7])
                     c.send(pickle.dumps({1: 'New item added'}))
                 elif func_Array[1] == 'watch':
-                    start_new_thread(watchhelper, (au.SellItem.watch(
-                        func_Array[2]), "item", serverAddressPort,))
+                    itemclass = au.SellItem.getitem(func_Array[2], func_Array[3])
+                    start_new_thread(watchhelper, (itemclass.watch(), "item", serverAddressPort,))
                 else:
                     owner = func_Array[1]
                     title = func_Array[2]
