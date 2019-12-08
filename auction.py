@@ -12,7 +12,7 @@ class User:
         self.name = name
         self.surname = surname
         self.password = password
-        self.is_verified = is_verified
+        self.is_verified = False
         self.verification_code = name+email
         self.balance = 0
         self.reservedbalance = 0
