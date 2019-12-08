@@ -26,7 +26,7 @@ item_collection = db.get_collection("items")
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = "127.0.0.1"
-port = 8034
+port = 8035
 try:
    soc.connect((host, port))
 except:
@@ -45,7 +45,7 @@ while True:
         if message == 'quit':
             break
     soc.send(message.encode("ascii"))
-    if len(message.split(" ")) > 1 and message.split(" ")[1] == 'watch':
+    while len(message.split(" ")) > 1 and message.split(" ")[1] == 'watch':
         try:
             start_new_thread(watcher,(message,))
         except:
