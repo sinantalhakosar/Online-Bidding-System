@@ -12,7 +12,7 @@ class User:
         self.name = name
         self.surname = surname
         self.password = password
-        self.is_verified = False
+        self.is_verified = is_verified
         self.verification_code = name+email
         self.balance = 0
         self.reservedbalance = 0
@@ -36,7 +36,22 @@ class User:
             print("Verification code is wrong")
         beautify()
 
+    @staticmethod
+    def getUser(email):
+        user = user_collection.find_one({"email": email})
+        if(user):
+            authuser = User(user["email"], user["name"],
+                            user["surname"], user["password"], True)
+            authuser.balance = user["balance"]
+            authuser.is_verified = user["is_verified"]
+            authuser.reservedbalance = user["reservedbalance"]
+            authuser.active = user["active"]
+            return authuser
+        else:
+            print("User not found.")
+
     # User password is changed. If forgotten, oldpassword is set as None and a reminder with a uniq temporary password is sent. Next call will be with temporary password as oldpassword for changing the password.
+
     def changepassword(self, newpassword, oldpassword=None):
         if oldpassword is None:
             self.password = self.email + str(time.time())
