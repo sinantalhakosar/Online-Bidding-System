@@ -1,6 +1,6 @@
-# Online Bidding System 
+# Online Bidding System
 
-Furkan Doğan / 2098937 
+Furkan Doğan / 2098937
 
 Sinan Talha Koşar / 2099190
 
@@ -15,16 +15,20 @@ mongod --replSet rs0 --port 27019 --bind_ip localhost --dbpath ~/data/mongodb/rs
 ```
 
 Then we connected MongoDB from terminal with this command:
+
 ```
 mongo
-````
+```
 
 And we first initiated the replica sets and then created database named bidding and two collections for users and items.
+
 ```
 rs.initiate()
 use bidding
 db.createCollection("users")
 db.createCollection("items")
+db.createCollection("history")
+
 ```
 
 In python we used pymongo which is official api like below to reach MongoDB
@@ -71,7 +75,7 @@ def watch(pipeline):
                     print(change)
 ```
 
-In the tests.py file we tried to test all the usecases. You can start it by typing 
+In the tests.py file we tried to test all the usecases. You can start it by typing
 
 ```
 python3 tests.py
