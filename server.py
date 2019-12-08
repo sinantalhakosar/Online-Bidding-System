@@ -19,7 +19,6 @@ item_Func = {}
 def threaded(c,user):
     try:
         print("mail:",user["email"])
-        user_Obj = au.User(user["email"],user["name"],user["surname"],user["password"],True)
     except:
         print("Error creating User Object")
     c.send('200'.encode('ascii'))
@@ -35,9 +34,9 @@ def threaded(c,user):
         else:
             func_Name = data.decode('ascii')
             func_Array = func_Name.split(" ")
-            func = getattr(user_Obj,func_Array[0])(*func_Array[1:])
-            print(user_Obj.name)
-            print(user_Obj.surname)
+            func = getattr(user,func_Array[0])(*func_Array[1:])
+            print(user.name)
+            print(user.surname)
             c.send(data)
             
     # connection closed 
@@ -75,7 +74,7 @@ while True:
     print("Connected with " + ip + ":" + port)
     data = c.recv(1024)
     print("ilk gelen:",data.decode('ascii'))
-    user = user_collection.find_one({"email": data.decode('ascii')})
+    user = au.User.getUser(data.decode('ascii'))
     if user is not None:
         try:
             start_new_thread(threaded, (c,user,)) 
