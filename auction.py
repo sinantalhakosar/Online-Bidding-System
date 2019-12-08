@@ -152,7 +152,7 @@ class User:
 
 class SellItem:
     # Create a new item for sale. bidtype is either of increment, decrement, instantincrement. minbid is the minimum bid unit.
-    def __init__(self, owner, title, itemtype, description, bidtype, starting, minbid=1.0, image=None):
+    def __init__(self, owner, title, itemtype, description, bidtype, starting, minbid=1.0,bring=False, image=None):
         self.owner = owner
         self.newowner = ""
         self.state = "onhold"
@@ -167,8 +167,25 @@ class SellItem:
         self.stopbid = 0
         self.currentbid = 0
         self.lastbidder = ""
-        itemtosave = self.__dict__
-        item_collection.insert_one(itemtosave)
+        if(not bring):
+            itemtosave = self.__dict__
+            item_collection.insert_one(itemtosave)
+
+    @staticmethod
+    def getitem(owner, title):
+        item = item_collection.find_one(
+            {"owner": owner, "title": title})
+        if(item):
+            itemclass = SellItem(owner,title,item["itemtype"],item["description"],item["bidtype"],item["starting"],item["minbid"],True)
+            itemclass.newowner = item["newowner"]
+            itemclass.state = item["state"]
+            itemclass.price = item["price"]
+            itemclass.stopbid = item["stopbid"]
+            itemclass.currentbid = item["currentbid"]
+            itemclass.lastbidder = item["lastbidder"]
+            return itemclass
+        else:
+            print("Item not found.")
 
     # Start the bidding for auctions. Auction will stop when stopbid is reached, if there is a bidder at the moment, he/she will win the auction automatically.
     def startauction(self, stopbid=None):
