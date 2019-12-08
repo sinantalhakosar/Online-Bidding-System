@@ -78,9 +78,6 @@ def threaded(c, user, address):
                     title = func_Array[2]
                     try:
                         itemclass = au.SellItem.getitem(owner, title)
-                        print(itemclass.stopbid)
-                        print(func_Array[3])
-                        print(func_Array[4:])
                         itemfunc = getattr(itemclass, func_Array[3])(*func_Array[4:])
                         c.send(pickle.dumps(itemfunc))
                     except:
@@ -91,7 +88,7 @@ def threaded(c, user, address):
 
 # TCP - IP, Socket Configurations
 host = "127.0.0.1"
-port = 8037  # arbitrary non-privileged port
+port = 8038  # arbitrary non-privileged port
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 print("Socket created")

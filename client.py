@@ -26,7 +26,7 @@ item_collection = db.get_collection("items")
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = "127.0.0.1"
-port = 8037
+port = 8038
 try:
    soc.connect((host, port))
 except:
