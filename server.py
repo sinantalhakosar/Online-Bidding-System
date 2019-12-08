@@ -10,6 +10,8 @@ import pymongo
 import time
 from passlib.context import CryptContext
 
+import pickle
+
 import auction as au
 
 print_lock = threading.Lock() 
@@ -17,7 +19,7 @@ print_lock = threading.Lock()
 user_Func = {"deneme":au.User.addbalance}
 item_Func = {}
 def threaded(c,user):
-    c.send('200'.encode('ascii'))
+    c.send('thread_created'.encode('ascii'))
     while True: 
         print("--------")
         # data received from client 
@@ -39,7 +41,7 @@ def threaded(c,user):
     c.close() 
 ## TCP - IP, Socket Configurations
 host = "127.0.0.1"
-port = 8007 # arbitrary non-privileged port
+port = 8008 # arbitrary non-privileged port
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print("Socket created")
 try:
@@ -68,24 +70,25 @@ while True:
     c, address = s.accept()
     ip, port = str(address[0]), str(address[1])
     print("Connected with " + ip + ":" + port)
-    data = c.recv(1024)
-    print("ilk gelen:",data.decode('ascii'))
-    user = au.User.getUser(data.decode('ascii'))
-    if user is not None:
-        try:
-            start_new_thread(threaded, (c,user,)) 
-        except:
-            print("Unable to open thread")
-    else:
-        print('User does not exist. Registering...')
-        time.sleep(2)
-        new_Mail = data.decode('ascii')
-        new_Name = input('name:')
-        new_Surname = input('surname:')
-        new_Password = input('surname:')
-        au.User(new_Mail,new_Name,new_Surname,new_Password)
-        start_new_thread(threaded, (c,user_collection.find_one({"email": data.decode('ascii')}),))
-        print('New User Created.')
+    while True:
+        data = c.recv(1024)
+        print("ilk gelen:",data.decode('ascii'))
+        user = au.User.getUser(data.decode('ascii'))
+        if user is not None:
+            try:
+                start_new_thread(threaded, (c,user,)) 
+            except:
+                print("Unable to open thread")
+        else:
+            time.sleep(2)
+            c.send('404'.encode('ascii'))
+            newuserinfo = c.recv(1024)
+            newuser = pickle.loads(newuserinfo)
+            if newuser[1] == 'continue':
+                continue
+            newuserclass = au.User(newuser[1],newuser[2],newuser[3],newuser[4])
+            start_new_thread(threaded, (c,newuserclass,))
+            print('New User Created.')
         
 
 s.close()
