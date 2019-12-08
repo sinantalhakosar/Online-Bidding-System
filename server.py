@@ -16,12 +16,10 @@ import auction as au
 
 print_lock = threading.Lock() 
 
-user_Func = {"deneme":au.User.addbalance}
-item_Func = {}
+
 def threaded(c,user):
-    c.send('thread_created'.encode('ascii'))
+    c.send(pickle.dumps({1:'thread_created'}))
     while True: 
-        print("--------")
         # data received from client 
         data = c.recv(1024) 
         if not data: 
@@ -33,9 +31,7 @@ def threaded(c,user):
             func_Name = data.decode('ascii')
             func_Array = func_Name.split(" ")
             func = getattr(user,func_Array[0])(*func_Array[1:])
-            print(user.name)
-            print(user.surname)
-            c.send(data)
+            c.send(pickle.dumps(func))
             
     # connection closed 
     c.close() 
@@ -66,29 +62,27 @@ item_collection = db.get_collection("items")
 
 ## Capturing first data and passing it to the threads
 while True:
-    print("sadsads")
     c, address = s.accept()
     ip, port = str(address[0]), str(address[1])
     print("Connected with " + ip + ":" + port)
     while True:
         data = c.recv(1024)
-        print("ilk gelen:",data.decode('ascii'))
         user = au.User.getUser(data.decode('ascii'))
         if user is not None:
             try:
                 start_new_thread(threaded, (c,user,)) 
+                break
             except:
                 print("Unable to open thread")
         else:
             time.sleep(2)
-            c.send('404'.encode('ascii'))
+            c.send(pickle.dumps({1:'404'}))
             newuserinfo = c.recv(1024)
             newuser = pickle.loads(newuserinfo)
             if newuser[1] == 'continue':
                 continue
             newuserclass = au.User(newuser[1],newuser[2],newuser[3],newuser[4])
             start_new_thread(threaded, (c,newuserclass,))
-            print('New User Created.')
         
 
 s.close()

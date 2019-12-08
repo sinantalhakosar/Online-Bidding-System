@@ -22,7 +22,6 @@ class User:
             usertosave["password"] = encrypt_password(usertosave["password"])
             user_collection.insert_one(usertosave)
             print("User is created but not verified")
-        beautify()
 
     # Static method. Verification number is checked agains stored one and user is enabled.
     @staticmethod
@@ -31,10 +30,9 @@ class User:
         if (user["verification_code"] == verification_number):
             user_collection.update_one(
                 {"email": email}, {"$set": {"is_verified": True}})
-            print("Verification is ok")
+            return {1:"Verification is ok"}
         else:
-            print("Verification code is wrong")
-        beautify()
+            return {1:"Verification code is wrong"}
 
     @staticmethod
     def getUser(email):
@@ -55,15 +53,12 @@ class User:
     def changepassword(self, newpassword, oldpassword=None):
         if oldpassword is None:
             self.password = self.email + str(time.time())
-            print("Your password have been resetted your new password is {0}".format(
-                self.password))
-            beautify()
-        else:
-            self.password = newpassword
+            return {1:"Your password have been resetted your new password is {0}".format(
+                self.password)}
+        self.password = newpassword
         user_collection.update_one(
             {"email": self.email}, {"$set": {"password": encrypt_password(self.password)}})
-        print("Password change is succesful")
-        beautify()
+        return {1:"Password change is succesful"}
 
     # Get item list of the user given as parameter. The state is either of all, onhold, active, sold
     def listitems(self, user, itemtype=None, state='all'):
@@ -71,9 +66,9 @@ class User:
         itemlist = list(items)
         result = []
         if (not len(itemlist)):
-            return result
+            return {1:result}
         if (itemtype is None and state == "all"):
-            return itemlist
+            return {1:itemlist}
         elif(itemtype is not None and state == "all"):
             for item in itemlist:
                 if (item["itemtype"] == itemtype):
@@ -86,7 +81,7 @@ class User:
             for item in itemlist:
                 if (item["state"] == state):
                     result.append(item)
-        return result
+        return {1:result}
 
     # Static method watch for new items. User will be notified by calling watchmethod for newly added items and staring bids for given item types. None stands for all types
     @staticmethod
@@ -107,8 +102,7 @@ class User:
         self.balance += int(amount)
         user_collection.update_one(
             {"email": self.email}, {"$set": {"balance": self.balance}})
-        print("Your new balance is {0}".format(self.balance))
-        beautify()
+        return {1:"Your new balance is {0}".format(self.balance)}
 
     # Get financial report for user including items sold, on sale, all expenses and income
     def report(self):
@@ -129,25 +123,19 @@ class User:
 
         for item in boughtitemlist:
             expense = expense + int(item["price"])
-
-        print("-----REPORT-----")
-        print()
-        print(self.name + " " + self.surname)
-        print()
-        print("You sold this items:")
-        print()
+        returnstring = ""
+        returnstring += "-----REPORT-----\n"
+        returnstring += self.name + " " + self.surname + "\n"
+        returnstring += "You sold this items:\n"
         for item in solditems:
-            print("- " + item["title"])
-        print()
-        print("You have this items onsale:")
-        print()
+            returnstring += "- " + item["title"] + "\n"
+        returnstring += "You have this items onsale:\n"
         for item in onsaleitems:
-            print("- " + item["title"])
-        print()
-        print("Your income is {0}$".format(income))
-        print()
-        print("Your expense is {0}$".format(expense))
-        beautify()
+            returnstring += "- " + item["title"] + "\n"
+        returnstring += "Your income is {0}$".format(income)
+       
+        returnstring += "\nYour expense is {0}$".format(expense)
+        return {1:returnstring}
 
 
 class SellItem:

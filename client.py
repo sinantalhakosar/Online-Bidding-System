@@ -35,11 +35,12 @@ while True:
         if message == 'quit':
             break
     soc.send(message.encode("ascii"))
-    data = soc.recv(1024)
-    if data.decode('ascii') == 'thread_created':
+    data = soc.recv(8128)
+    pickleload = pickle.loads(data)
+    if pickleload[1] == 'thread_created':
         is_loggedin = True
         print('User Login Successfull')
-    elif data.decode('ascii') == '404':
+    elif pickleload[1] == '404':
         print('User not found.')
         ans = input('Do you want to register? (y/n):')
         if ans == 'y':
@@ -53,7 +54,13 @@ while True:
         else:
             soc.send(pickle.dumps({1:"continue"})) 
     else:
-        print(data.decode('ascii'))
+        print()
+        print("----------------")
+        print()
+        print(pickleload[1])
+        print()
+        print("----------------")
+        print()
     if is_loggedin:
         message = input("action:")
         if message == 'quit':
