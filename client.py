@@ -7,6 +7,10 @@ import pymongo
 import time
 from passlib.context import CryptContext
 import pickle
+
+# import thread module 
+from _thread import *
+import threading 
 ## MongoDB Configurations
 pwd_context = CryptContext(
     schemes=["pbkdf2_sha256"],
@@ -20,8 +24,9 @@ item_collection = db.get_collection("items")
 
 
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 host = "127.0.0.1"
-port = 8008
+port = 8034
 try:
    soc.connect((host, port))
 except:
@@ -29,16 +34,32 @@ except:
    sys.exit()
 print("Please enter 'quit' to exit")
 is_loggedin = False
+
+def watcher(message):
+    while(True):
+        data = UDPServerSocket.recvfrom(8196)
+        print(pickle.loads(data[0])[2])
 while True:
     if not is_loggedin:
         message = input("email:")
         if message == 'quit':
             break
     soc.send(message.encode("ascii"))
+    if len(message.split(" ")) > 1 and message.split(" ")[1] == 'watch':
+        try:
+            start_new_thread(watcher,(message,))
+        except:
+            print("thread sorun")
+        message = input("action:")
+        soc.send(message.encode("ascii"))
     data = soc.recv(8128)
     pickleload = pickle.loads(data)
     if pickleload[1] == 'thread_created':
         is_loggedin = True
+        UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        localIP     = "127.0.0.1"
+        localPort   = pickleload[2]
+        UDPServerSocket.bind((localIP, localPort))
         print('User Login Successfull')
     elif pickleload[1] == '404':
         print('User not found.')
@@ -53,6 +74,8 @@ while True:
             soc.send(pickle.dumps(registerinfo))
         else:
             soc.send(pickle.dumps({1:"continue"})) 
+    elif pickleload[1] == 'watch':
+        print(pickleload[2])
     else:
         print()
         print("----------------")

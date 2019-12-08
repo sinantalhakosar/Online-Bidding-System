@@ -92,8 +92,7 @@ class User:
             pipeline = [
                 {"$match": {"operationType": "insert", "fullDocument.itemtype": itemtype}}]
         try:
-            print(pipeline)
-            _thread.start_new_thread(watchhelper, (pipeline,))
+            return pipeline
         except:
             print("Error: unable to start thread")
 
@@ -172,8 +171,6 @@ class SellItem:
             itemclass.currentbid = item["currentbid"]
             itemclass.lastbidder = item["lastbidder"]
             return itemclass
-        else:
-            print("Item not found.")
 
     # Start the bidding for auctions. Auction will stop when stopbid is reached, if there is a bidder at the moment, he/she will win the auction automatically.
     def startauction(self, stopbid=None):
@@ -181,17 +178,16 @@ class SellItem:
             self.state = "active"
             item = item_collection.find_one_and_update(
                 {"owner": self.owner, "title": self.title}, {"$set": {"state": "active"}})
-            print("The auction had started")
+            return {1:"The auction had started"}
         else:
             if(stopbid < self.minbid):
-                print("Stop bid can not be less than min bid")
+                return {1:"Stop bid can not be less than min bid"}
             else:
                 self.state = "active"
                 self.stopbid = stopbid
                 item = item_collection.find_one_and_update(
                     {"owner": self.owner, "title": self.title}, {"$set": {"state": "active", "stopbid": stopbid}})
-                print("The auction had started")
-        beautify()
+                return {1:"The auction had started"}
 
     # User bids the amount for the item. Auction should be active and users should have a corressponding balance. Users balance is reserved by this amount. He/she cannot spend it until bid is complete. If there is a previous bid, it is updated.
     def bid(self, user, amount):
@@ -206,8 +202,8 @@ class SellItem:
                         {"owner": self.owner, "title": self.title}, {"$set": self.__dict__})
                     user_collection.find_one_and_update(
                         {"email": user}, {"$set": {"balance": int(dbuser["balance"])-amount}})
-                    print("Item is sold for {0} and the new owner is {1}".format(
-                        self.price, dbuser["name"]+" "+dbuser["surname"]))
+                    return {1:"Item is sold for {0} and the new owner is {1}".format(
+                        self.price, dbuser["name"]+" "+dbuser["surname"])}
                 else:
                     self.currentbid = amount
                     if (self.lastbidder != ""):
@@ -221,13 +217,12 @@ class SellItem:
                         {"email": user}, {"$set": {"reservedbalance": newreservedbalance}})
                     item = item_collection.find_one_and_update(
                         {"owner": self.owner, "title": self.title}, {"$set": {"currentbid": self.currentbid, "lastbidder": user}})
-                    print("The new bid for {0} is {1}$".format(
-                        self.title, self.currentbid))
+                    return {1:"The new bid for {0} is {1}$".format(
+                        self.title, self.currentbid)}
             else:
-                print("You don't have enough amount to bid to this item")
+                return {1:"You don't have enough amount to bid to this item"}
         else:
-            print("This item is not onsale")
-        beautify()
+            return {1:"This item is not onsale"}
 
     # Only owner can call this. Item is sold to the last bidder. Auction is closed
     def sell(self):
@@ -239,20 +234,18 @@ class SellItem:
             {"owner": self.owner, "title": self.title}, {"$set": {"state": self.state, "newowner": self.newowner, "price": self.price}})
         user_collection.find_one_and_update(
             {"email": self.newowner}, {"$set": {"balance": int(newowner["balance"])-self.currentbid, "reservedbalance": int(newowner["reservedbalance"])-self.currentbid}})
-        print("Item is sold for {0} and the new owner is {1}".format(
-            self.price, newowner))
-        beautify()
+        return {1:"Item is sold for {0} and the new owner is {1}".format(
+            self.price, newowner)}
 
     # Give the complete state of the item. Show auction data if available as well.
     def view(self):
         if(self.state == "active"):
-            print("{0} is for sale and the last bid is {1}$".format(
-                self.title, self.currentbid))
+            return {1:"{0} is for sale and the last bid is {1}$".format(
+                self.title, self.currentbid)}
         elif(self.state == "onhold"):
-            print("{0} is ready to sell, you can start the auction".format(self.title))
+            return {1:"{0} is ready to sell, you can start the auction".format(self.title)}
         else:
-            print("{0}  is sold for {1}$".format(self.title, self.price))
-        beautify()
+            return {1:"{0}  is sold for {1}$".format(self.title, self.price)}
 
     # User is notified by calling watchmethod when the auction state of the item changes
     def watch(self, user):

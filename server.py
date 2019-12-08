@@ -11,14 +11,26 @@ import time
 from passlib.context import CryptContext
 
 import pickle
+import json
 
 import auction as au
 
 print_lock = threading.Lock() 
+def watchhelper(pipeline,serverAddressPort):
+    try:
+        with item_collection.watch(pipeline)as stream:
+            for change in stream:
+                returnstring = ""
+                returnstring +="There is an update in your watch list:\n"
+                returnstring += str(change["fullDocument"])
+                print("furkan")
+                UDPClientSocket.sendto(pickle.dumps({1:'watch',2:returnstring}), serverAddressPort)
+    except pymongo.errors.PyMongoError:
+        print("Failure during ChangeStream initialization.")
 
-
-def threaded(c,user):
-    c.send(pickle.dumps({1:'thread_created'}))
+def threaded(c,user,address):
+    serverAddressPort   = ("127.0.0.1", address)
+    c.send(pickle.dumps({1:'thread_created',2:address}))
     while True: 
         # data received from client 
         data = c.recv(1024) 
@@ -30,15 +42,33 @@ def threaded(c,user):
         else:
             func_Name = data.decode('ascii')
             func_Array = func_Name.split(" ")
-            func = getattr(user,func_Array[0])(*func_Array[1:])
-            c.send(pickle.dumps(func))
-            
+            if func_Array[0] == 'user':
+                if func_Array[1] == 'watch':
+                    print(user.email)
+                    start_new_thread(watchhelper, (au.User.watch(func_Array[2]),serverAddressPort,))
+                else:
+                    func = getattr(user,func_Array[1])(*func_Array[2:])
+                    c.send(pickle.dumps(func))
+            elif func_Array[0] == 'item':
+                if func_Array[1] == 'add':
+                    au.SellItem(user.email, func_Array[2], func_Array[3],func_Array[4], func_Array[5], func_Array[6], func_Array[7])
+                    c.send(pickle.dumps({1:'New item added'}))
+                else:
+                    owner = func_Array[1]
+                    title = func_Array[2]
+                    try:
+                        itemclass = au.SellItem.getitem(owner,title)
+                        itemfunc = getattr(itemclass,func_Array[3])(*func_Array[4:])
+                        c.send(pickle.dumps(itemfunc))
+                    except:
+                        c.send(pickle.dumps({1:'Item not exists'}))
     # connection closed 
     c.close() 
 ## TCP - IP, Socket Configurations
 host = "127.0.0.1"
-port = 8008 # arbitrary non-privileged port
+port = 8034 # arbitrary non-privileged port
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 print("Socket created")
 try:
    s.bind((host, port)) 
@@ -70,7 +100,7 @@ while True:
         user = au.User.getUser(data.decode('ascii'))
         if user is not None:
             try:
-                start_new_thread(threaded, (c,user,)) 
+                start_new_thread(threaded, (c,user,address[1])) 
                 break
             except:
                 print("Unable to open thread")
