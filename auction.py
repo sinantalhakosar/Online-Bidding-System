@@ -3,6 +3,10 @@ import pymongo
 import time
 from passlib.context import CryptContext
 import _thread
+import threading
+
+itemlock = threading.Lock()
+userlock = threading.Lock()
 
 class User:
     # A new user is created. User is in not verified state. User is send an email with verification number.
@@ -99,9 +103,11 @@ class User:
 
     # Users virtual balance in system is incremented/decremented by amount
     def addbalance(self, amount):
+        userlock.acquire()
         self.balance += int(amount)
         user_collection.update_one(
             {"email": self.email}, {"$set": {"balance": self.balance}})
+        userlock.release()
         return {1:"Your new balance is {0}".format(self.balance)}
 
     # Get financial report for user including items sold, on sale, all expenses and income
@@ -178,23 +184,28 @@ class SellItem:
     def decrementer(self):
         while(self.decremented >= self.stopbid):
             time.sleep(10)
+            itemlock.acquire()
             decrementAmount = int((self.starting-self.stopbid)/5)
             self.decremented -= decrementAmount
             history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":"decrementer","bidAmount":decrementAmount,"isSold":False})
             item = item_collection.find_one_and_update(
                     {"owner": self.owner, "title": self.title}, {"$set": {"decremented": self.decremented}})
+            itemlock.release()
             if(self.newowner != ""):
                 _thread.exit_thread()
 
     # Start the bidding for auctions. Auction will stop when stopbid is reached, if there is a bidder at the moment, he/she will win the auction automatically.
     def startauction(self, stopbid=None):
+        itemlock.acquire()
         if (stopbid is None):
             self.state = "active"
             item = item_collection.find_one_and_update(
                 {"owner": self.owner, "title": self.title}, {"$set": {"state": "active"}})
+            itemlock.release()
             return {1:"The auction had started"}
         else:
             if(int(stopbid) < self.minbid):
+                itemlock.release()
                 return {1:"Stop bid can not be less than min bid"}
             else:
                 if(self.bidtype == "decrement"):
@@ -203,11 +214,13 @@ class SellItem:
                 self.stopbid = int(stopbid)
                 item = item_collection.find_one_and_update(
                     {"owner": self.owner, "title": self.title}, {"$set": {"state": "active", "stopbid": self.stopbid}})
+                itemlock.release()
                 return {1:"The auction had started"}
 
     # User bids the amount for the item. Auction should be active and users should have a corressponding balance. Users balance is reserved by this amount. He/she cannot spend it until bid is complete. If there is a previous bid, it is updated.
     def bid(self, user, stramount):
-        amount = int(amount)
+        itemlock.acquire()
+        amount = int(stramount)
         if(self.state == "active"):
             dbuser = user_collection.find_one({"email": user})
             if (dbuser):
@@ -222,6 +235,7 @@ class SellItem:
                             user_collection.find_one_and_update(
                                 {"email": user}, {"$set": {"balance": int(dbuser["balance"])-amount}})
                             history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":True,"soldto":self.newowner})
+                            itemlock.release()
                             return {1:"Item is sold for {0} and the new owner is {1}".format(
                                 self.price, dbuser["name"]+" "+dbuser["surname"])}
                         else:
@@ -239,11 +253,14 @@ class SellItem:
                                 item = item_collection.find_one_and_update(
                                     {"owner": self.owner, "title": self.title}, {"$set": {"currentbid": self.currentbid, "lastbidder": user}})
                                 history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":False})
+                                itemlock.release()
                                 return {1:"The new bid for {0} is {1}$".format(
                                     self.title, self.currentbid)}
                             else:
+                                itemlock.release()
                                 return {1:"Your bid need to more than last bid"}
                     else:
+                        itemlock.release()
                         return {1:"You don't have enough amount to bid to this item"}
                 elif(self.bidtype == "decrement"):
                     if(int(dbuser["balance"]) - int(dbuser["reservedbalance"]) >= amount):
@@ -256,6 +273,7 @@ class SellItem:
                             user_collection.find_one_and_update(
                                 {"email": user}, {"$set": {"balance": int(dbuser["balance"])-amount}})
                             history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":True,"soldto":self.newowner})
+                            itemlock.release()  
                             return {1:"Item is sold for {0} and the new owner is {1}".format(
                                 self.price, dbuser["name"]+" "+dbuser["surname"])}
                         else:
@@ -273,11 +291,14 @@ class SellItem:
                                 item = item_collection.find_one_and_update(
                                     {"owner": self.owner, "title": self.title}, {"$set": {"currentbid": self.currentbid, "lastbidder": user}})
                                 history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":False})
+                                itemlock.release()
                                 return {1:"The new bid for {0} is {1}$".format(
                                     self.title, self.currentbid)}
                             else:
+                                itemlock.release()
                                 return {1:"Your bid need to more than last bid"}
                     else:
+                        itemlock.release()
                         return {1:"You don't have enough amount to bid to this item"}
                 elif(self.bidtype == "instantincrement"):
                     if(int(dbuser["balance"]) - int(dbuser["reservedbalance"]) >= amount):
@@ -290,6 +311,7 @@ class SellItem:
                             user_collection.find_one_and_update(
                                 {"email": user}, {"$set": {"balance": int(dbuser["balance"])-amount}})
                             history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":True,"soldto":self.newowner})
+                            itemlock.release()
                             return {1:"Item is sold for {0} and the new owner is {1}".format(
                                 self.price, dbuser["name"]+" "+dbuser["surname"])}
                         else:
@@ -301,17 +323,22 @@ class SellItem:
                             item = item_collection.find_one_and_update(
                                 {"owner": self.owner, "title": self.title}, {"$set": {"currentbid": self.currentbid, "lastbidder": user}})
                             history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":False})
+                            itemlock.release()
                             return {1:"The new bid for {0} is {1}$".format(
                                 self.title, self.currentbid)}
                     else:
+                        itemlock.release()
                         return {1:"You don't have enough amount to bid to this item"}
             else:
+                itemlock.release()
                 return {1:"User not found."} 
         else:
+            itemlock.release()
             return {1:"This item is not onsale"}
 
     # Only owner can call this. Item is sold to the last bidder. Auction is closed
     def sell(self):
+        itemlock.acquire()
         self.price = self.currentbid
         newowner = user_collection.find_one({"email": self.lastbidder})
         self.newowner = self.lastbidder
@@ -321,6 +348,7 @@ class SellItem:
         user_collection.find_one_and_update(
             {"email": self.newowner}, {"$set": {"balance": int(newowner["balance"])-self.currentbid, "reservedbalance": int(newowner["reservedbalance"])-self.currentbid}})
         history_collection.insert_one({"owner":self.owner,"title":self.title,"isSold":True,"soldto":self.newowner})
+        itemlock.release()
         return {1:"Item is sold for {0} and the new owner is {1}".format(
             self.price, newowner)}
 
