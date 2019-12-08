@@ -15,8 +15,6 @@ import json
 
 import auction as au
 
-print_lock = threading.Lock()
-
 
 def watchhelper(pipeline, optype, serverAddressPort):
     if optype == "user":
@@ -26,16 +24,20 @@ def watchhelper(pipeline, optype, serverAddressPort):
                     returnstring = ""
                     returnstring += "There is an update in your watch list:\n"
                     returnstring += str(change["fullDocument"])
-                    print("furkan")
                     UDPClientSocket.sendto(pickle.dumps(
                         {1: 'watch', 2: returnstring}), serverAddressPort)
         except pymongo.errors.PyMongoError:
             print("Failure during ChangeStream initialization.")
     else:
         try:
-            with item_collection.watch(pipeline)as stream:
+            with item_collection.watch(pipeline,full_document = 'updateLookup')as stream:
                 for change in stream:
-                    print(change)
+                    returnstring = ""
+                    returnstring += "There is an update in your watch list:\n"
+                    returnstring += str(change["fullDocument"])
+                    returnstring += "\nUpdated Fiels Are:\n"
+                    returnstring += str(change["updatedFields"])
+                    UDPClientSocket.sendto(pickle.dumps({1: 'watch', 2: returnstring}), serverAddressPort)
         except pymongo.errors.PyMongoError:
             print("Failure during ChangeStream initialization.")
 
@@ -76,7 +78,7 @@ def threaded(c, user, address):
                     title = func_Array[2]
                     try:
                         itemclass = au.SellItem.getitem(owner, title)
-                        print(itemclass.title)
+                        print(itemclass.stopbid)
                         print(func_Array[3])
                         print(func_Array[4:])
                         itemfunc = getattr(itemclass, func_Array[3])(*func_Array[4:])
@@ -89,7 +91,7 @@ def threaded(c, user, address):
 
 # TCP - IP, Socket Configurations
 host = "127.0.0.1"
-port = 8035  # arbitrary non-privileged port
+port = 8037  # arbitrary non-privileged port
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 print("Socket created")
