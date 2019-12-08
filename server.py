@@ -17,10 +17,6 @@ print_lock = threading.Lock()
 user_Func = {"deneme":au.User.addbalance}
 item_Func = {}
 def threaded(c,user):
-    try:
-        print("mail:",user["email"])
-    except:
-        print("Error creating User Object")
     c.send('200'.encode('ascii'))
     while True: 
         print("--------")
