@@ -26,7 +26,7 @@ item_collection = db.get_collection("items")
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 host = "127.0.0.1"
-port = 8035
+port = 8037
 try:
    soc.connect((host, port))
 except:
@@ -38,7 +38,13 @@ is_loggedin = False
 def watcher(message):
     while(True):
         data = UDPServerSocket.recvfrom(8196)
+        print()
+        print("----------------")
+        print()
         print(pickle.loads(data[0])[2])
+        print()
+        print("----------------")
+        print()
 while True:
     if not is_loggedin:
         message = input("email:")
@@ -49,7 +55,7 @@ while True:
         try:
             start_new_thread(watcher,(message,))
         except:
-            print("thread sorun")
+            print("Unable to open thread")
         message = input("action:")
         soc.send(message.encode("ascii"))
     data = soc.recv(8128)
@@ -74,8 +80,6 @@ while True:
             soc.send(pickle.dumps(registerinfo))
         else:
             soc.send(pickle.dumps({1:"continue"})) 
-    elif pickleload[1] == 'watch':
-        print(pickleload[2])
     else:
         print()
         print("----------------")
