@@ -4,7 +4,6 @@ import time
 from passlib.context import CryptContext
 import _thread
 
-
 class User:
     # A new user is created. User is in not verified state. User is send an email with verification number.
     def __init__(self, email, name, surname, password, bring=False):
@@ -154,6 +153,7 @@ class SellItem:
         self.stopbid = 0
         self.currentbid = 0
         self.lastbidder = ""
+        self.decremented = starting
         if(not bring):
             itemtosave = self.__dict__
             item_collection.insert_one(itemtosave)
@@ -170,7 +170,19 @@ class SellItem:
             itemclass.stopbid = item["stopbid"]
             itemclass.currentbid = item["currentbid"]
             itemclass.lastbidder = item["lastbidder"]
+            itemclass.decremented =item["decremented"]
             return itemclass
+
+    def decrementer(self):
+        while(self.decremented >= self.stopbid):
+            time.sleep(10)
+            decrementAmount = int((self.starting-self.stopbid)/5)
+            self.decremented -= decrementAmount
+            history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":"decrementer","bidAmount":decrementAmount,"isSold":False})
+            item = item_collection.find_one_and_update(
+                    {"owner": self.owner, "title": self.title}, {"$set": {"decremented": self.decremented}})
+            if(self.newowner != ""):
+                _thread.exit_thread()
 
     # Start the bidding for auctions. Auction will stop when stopbid is reached, if there is a bidder at the moment, he/she will win the auction automatically.
     def startauction(self, stopbid=None):
@@ -183,6 +195,8 @@ class SellItem:
             if(stopbid < self.minbid):
                 return {1:"Stop bid can not be less than min bid"}
             else:
+                if(self.bidtype == "decrement"):
+                    _thread.start_new_thread(decrementer,())
                 self.state = "active"
                 self.stopbid = stopbid
                 item = item_collection.find_one_and_update(
@@ -193,34 +207,100 @@ class SellItem:
     def bid(self, user, amount):
         if(self.state == "active"):
             dbuser = user_collection.find_one({"email": user})
-            if(int(dbuser["balance"]) - int(dbuser["reservedbalance"]) >= amount):
-                if(self.stopbid != 0 and amount >= self.stopbid):
-                    self.price = amount
-                    self.newowner = user
-                    self.state = "sold"
-                    item = item_collection.find_one_and_update(
-                        {"owner": self.owner, "title": self.title}, {"$set": self.__dict__})
-                    user_collection.find_one_and_update(
-                        {"email": user}, {"$set": {"balance": int(dbuser["balance"])-amount}})
-                    return {1:"Item is sold for {0} and the new owner is {1}".format(
-                        self.price, dbuser["name"]+" "+dbuser["surname"])}
-                else:
-                    self.currentbid = amount
-                    if (self.lastbidder != ""):
-                        lastbidder = user_collection.find_one(
-                            {"email": self.lastbidder})
+            if(self.bidtype == "increment"):
+                if(int(dbuser["balance"]) - int(dbuser["reservedbalance"]) >= amount):
+                    if(self.stopbid != 0 and amount >= self.stopbid):
+                        self.price = amount
+                        self.newowner = user
+                        self.state = "sold"
+                        item = item_collection.find_one_and_update(
+                            {"owner": self.owner, "title": self.title}, {"$set": self.__dict__})
                         user_collection.find_one_and_update(
-                            {"email": self.lastbidder}, {"$set": {"reservedbalance": int(lastbidder["reservedbalance"])-amount}})
-                    self.lastbidder = user
-                    newreservedbalance = int(dbuser["reservedbalance"])+amount
-                    user_collection.find_one_and_update(
-                        {"email": user}, {"$set": {"reservedbalance": newreservedbalance}})
-                    item = item_collection.find_one_and_update(
-                        {"owner": self.owner, "title": self.title}, {"$set": {"currentbid": self.currentbid, "lastbidder": user}})
-                    return {1:"The new bid for {0} is {1}$".format(
-                        self.title, self.currentbid)}
-            else:
-                return {1:"You don't have enough amount to bid to this item"}
+                            {"email": user}, {"$set": {"balance": int(dbuser["balance"])-amount}})
+                        history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":True,"soldto":self.newowner})
+                        return {1:"Item is sold for {0} and the new owner is {1}".format(
+                            self.price, dbuser["name"]+" "+dbuser["surname"])}
+                    else:
+                        if(amount > self.currentbid):
+                            self.currentbid = amount
+                            if (self.lastbidder != ""):
+                                lastbidder = user_collection.find_one(
+                                    {"email": self.lastbidder})
+                                user_collection.find_one_and_update(
+                                    {"email": self.lastbidder}, {"$set": {"reservedbalance": int(lastbidder["reservedbalance"])-amount}})
+                            self.lastbidder = user
+                            newreservedbalance = int(dbuser["reservedbalance"])+amount
+                            user_collection.find_one_and_update(
+                                {"email": user}, {"$set": {"reservedbalance": newreservedbalance}})
+                            item = item_collection.find_one_and_update(
+                                {"owner": self.owner, "title": self.title}, {"$set": {"currentbid": self.currentbid, "lastbidder": user}})
+                            history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":False})
+                            return {1:"The new bid for {0} is {1}$".format(
+                                self.title, self.currentbid)}
+                        else:
+                            return {1:"Your bid need to more than last bid"}
+                else:
+                    return {1:"You don't have enough amount to bid to this item"}
+            elif(self.bidtype == "decrement"):
+                if(int(dbuser["balance"]) - int(dbuser["reservedbalance"]) >= amount):
+                    if(self.stopbid != 0 and amount >= self.decremented):
+                        self.price = amount
+                        self.newowner = user
+                        self.state = "sold"
+                        item = item_collection.find_one_and_update(
+                            {"owner": self.owner, "title": self.title}, {"$set": self.__dict__})
+                        user_collection.find_one_and_update(
+                            {"email": user}, {"$set": {"balance": int(dbuser["balance"])-amount}})
+                        history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":True,"soldto":self.newowner})
+                        return {1:"Item is sold for {0} and the new owner is {1}".format(
+                            self.price, dbuser["name"]+" "+dbuser["surname"])}
+                    else:
+                        if(amount > self.currentbid):
+                            self.currentbid = amount
+                            if (self.lastbidder != ""):
+                                lastbidder = user_collection.find_one(
+                                    {"email": self.lastbidder})
+                                user_collection.find_one_and_update(
+                                    {"email": self.lastbidder}, {"$set": {"reservedbalance": int(lastbidder["reservedbalance"])-amount}})
+                            self.lastbidder = user
+                            newreservedbalance = int(dbuser["reservedbalance"])+amount
+                            user_collection.find_one_and_update(
+                                {"email": user}, {"$set": {"reservedbalance": newreservedbalance}})
+                            item = item_collection.find_one_and_update(
+                                {"owner": self.owner, "title": self.title}, {"$set": {"currentbid": self.currentbid, "lastbidder": user}})
+                            history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":False})
+                            return {1:"The new bid for {0} is {1}$".format(
+                                self.title, self.currentbid)}
+                        else:
+                            return {1:"Your bid need to more than last bid"}
+                else:
+                    return {1:"You don't have enough amount to bid to this item"}
+            elif(self.bidtype == "instantincrement"):
+                if(int(dbuser["balance"]) - int(dbuser["reservedbalance"]) >= amount):
+                    if(self.stopbid != 0 and amount+self.currentbid >= self.stopbid):
+                        self.price = amount
+                        self.newowner = user
+                        self.state = "sold"
+                        item = item_collection.find_one_and_update(
+                            {"owner": self.owner, "title": self.title}, {"$set": self.__dict__})
+                        user_collection.find_one_and_update(
+                            {"email": user}, {"$set": {"balance": int(dbuser["balance"])-amount}})
+                        history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":True,"soldto":self.newowner})
+                        return {1:"Item is sold for {0} and the new owner is {1}".format(
+                            self.price, dbuser["name"]+" "+dbuser["surname"])}
+                    else:
+                        self.currentbid += amount
+                        self.lastbidder = user
+                        newbalance = int(dbuser["balance"])-amount
+                        user_collection.find_one_and_update(
+                            {"email": user}, {"$set": {"balance": newbalance}})
+                        item = item_collection.find_one_and_update(
+                            {"owner": self.owner, "title": self.title}, {"$set": {"currentbid": self.currentbid, "lastbidder": user}})
+                        history_collection.insert_one({"owner":self.owner,"title":self.title,"bidder":user,"bidAmount":amount,"isSold":False})
+                        return {1:"The new bid for {0} is {1}$".format(
+                            self.title, self.currentbid)}
+                else:
+                    return {1:"You don't have enough amount to bid to this item"}
         else:
             return {1:"This item is not onsale"}
 
@@ -234,6 +314,7 @@ class SellItem:
             {"owner": self.owner, "title": self.title}, {"$set": {"state": self.state, "newowner": self.newowner, "price": self.price}})
         user_collection.find_one_and_update(
             {"email": self.newowner}, {"$set": {"balance": int(newowner["balance"])-self.currentbid, "reservedbalance": int(newowner["reservedbalance"])-self.currentbid}})
+        history_collection.insert_one({"owner":self.owner,"title":self.title,"isSold":True,"soldto":self.newowner})
         return {1:"Item is sold for {0} and the new owner is {1}".format(
             self.price, newowner)}
 
@@ -248,18 +329,20 @@ class SellItem:
             return {1:"{0}  is sold for {1}$".format(self.title, self.price)}
 
     # User is notified by calling watchmethod when the auction state of the item changes
-    def watch(self, user):
+    def watch(self):
         pipeline = [{"$match": {"operationType": "update",
                                 "fullDocument.owner": self.owner, "fullDocument.title": self.title}}]
         try:
-            _thread.start_new_thread(watchhelper, (pipeline,))
+            return pipeline
         except:
             print("Error: unable to start thread")
 
     # Detailed acivity log for item with creation, auction start, bids and final value
-
     def history(self):
-        self.view()
+        returnstring=""
+        for x in history_collection.find({"owner":self.owner,"title":self.title}):
+            returnstring += str(x)
+        return {1:returnstring}
 
 
 def encrypt_password(password):
@@ -276,30 +359,6 @@ def beautify():
     print()
 
 
-def watchhelper(pipeline):
-    try:
-        resume_token = None
-        print(pipeline)
-        with item_collection.watch(pipeline)as stream:
-            for change in stream:
-                print(change)
-                print("There is an update in your watch list:")
-                print()
-                print(change["fullDocument"])
-                beautify()
-                resume_token = stream.resume_token
-    except pymongo.errors.PyMongoError:
-        if resume_token is None:
-            print("Failure during ChangeStream initialization.")
-            beautify()
-        else:
-            with item_collection.watch(pipeline, resume_after=resume_token) as stream:
-                for change in stream:
-                    print("There is an update in your watch list:")
-                    print()
-                    print(change["fullDocument"])
-                    beautify()
-
 
 pwd_context = CryptContext(
     schemes=["pbkdf2_sha256"],
@@ -310,3 +369,4 @@ client = pymongo.MongoClient("mongodb://localhost:27017")
 db = client.get_database("bidding")
 user_collection = db.get_collection("users")
 item_collection = db.get_collection("items")
+history_collection = db.get_collection("history")
