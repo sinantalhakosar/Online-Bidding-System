@@ -1,0 +1,10 @@
+{% extends 'base.html' %} {% block title %}Add Item{% endblock %} {% block content %}
+<h2>Add Item</h2>
+<div>
+  <form method="post">
+    {% csrf_token %} {{ form }}
+    <button class="btn" type="submit">Add Item</button>
+  </form>
+  <a class="btn" href="{% url 'home' %}">Back To Home</a>
+</div>
+{% endblock %}

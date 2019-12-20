@@ -1,3 +1,8 @@
 {
-    "python.pythonPath": "/usr/local/opt/python/bin/python3.7"
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.autoComplete.extraPaths": ["./auction"],
+  "python.linting.pylintEnabled": true,
+  "python.linting.enabled": true,
+  "djangointellisense.projectRoot": "${workspaceFolder}/auction/",
+  "python.linting.flake8Enabled": false
 }

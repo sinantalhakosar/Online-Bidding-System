@@ -1,0 +1,154 @@
+{% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content %} {% if user.is_authenticated and user.auctionuser.is_verified %}
+<div>
+  <div style="text-align:center">Hi {{ user.username }}! Welcome to Auction App!!</div>
+  <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'newitem' %}">Add Item</a></p>
+  <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'logout' %}">Shopping</a></p>
+  <p style="float: right;margin: 10px;"><a class="btn btn-primary" id="stop">Stop Auction</a></p>
+
+  <!-- Button trigger modal -->
+  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+    Start Auction
+  </button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Start Auction</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <label>Stop Bid:</label>
+          <input type="number"></input>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="start">Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <tr>
+        <th></th>
+        <th>Owner</th>
+        <th>New Owner</th>
+        <th>State</th>
+        <th>Price</th>
+        <th>Title</th>
+        <th>Item Type</th>
+        <th>Description</th>
+        <th>Bid Type</th>
+        <th>Starting</th>
+        <th>Min Bid</th>
+        <th>Image</th>
+        <th>Stop Bid</th>
+        <th>Current Bid</th>
+        <th>Last Bidder</th>
+        <th>Decremented</th>
+      </tr>
+      {% for r in items %}
+      <tr>
+        <td>
+          <div class="radio">
+            <label><input type="radio" id="{{ r.title }}" name="optradio"/></label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.owner }}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.newowner }}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.state }}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.price}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.title }}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.itemtype}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.description }}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.bidtype }}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.starting}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.minbid}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.image}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.stopbid}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.currentbid}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.lastbidder}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.title }}">{{ r.decremented}}</label>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'logout' %}">Log Out</a></p>
+</div>
+
+{% elif user.is_authenticated and not user.auctionuser.is_verified %}
+<p>Your account is not verified</p>
+<form action="{% url 'verify' %}" method="post">
+  <input id="verification_code" type="text" name="verification_code" placeholder="Verification Code" />
+  {% csrf_token %} {{ form.as_p }}
+  <button class="btn" type="submit">Verify</button>
+</form>
+{% else %}
+<p>You are not logged in</p>
+<a class="btn" href="{% url 'login' %}">Login</a>
+<a class="btn" href="{% url 'signup' %}">Register</a>
+{% endif %} {% endblock %}
