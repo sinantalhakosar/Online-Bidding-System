@@ -41,7 +41,7 @@ class Item(models.Model):
     description = models.CharField(max_length=100)
     bidtype = models.CharField(max_length=2, choices=BID_TYPE)
     starting = models.IntegerField(blank=True)
-    minbid = models.IntegerField(blank=True)
+    minbid = models.IntegerField()
     image = models.CharField(max_length=100, blank=True)
     stopbid = models.IntegerField(blank=True)
     currentbid = models.IntegerField(blank=True)

@@ -3,8 +3,8 @@
 <div style="text-align:center">
   <form method="post" id="form_login">
     {% csrf_token %} {{ form.as_p }}
-    <button class="btn" type="submit">Login</button>
+    <button class="btn btn-primary" type="submit">Login</button>
+    <a class="btn btn-primary" href="{% url 'signup'  %}">Register</a>
   </form>
-  <a class="btn" href="{% url 'signup'  %}">Register</a>
 </div>
 {% endblock %}

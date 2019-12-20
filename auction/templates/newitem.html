@@ -1,10 +1,15 @@
-{% extends 'base.html' %} {% block title %}Add Item{% endblock %} {% block content %}
-<h2>Add Item</h2>
-<div>
-  <form method="post">
-    {% csrf_token %} {{ form }}
-    <button class="btn" type="submit">Add Item</button>
-  </form>
-  <a class="btn" href="{% url 'home' %}">Back To Home</a>
+{% extends 'baseold.html' %} {% block title %}Login{% endblock %} {% block content %}
+
+<div style="margin: auto;width: intrinsic;">
+  <h2>New Item</h2>
+  <div>
+    <form method="post">
+      {% csrf_token %} {{ form }}
+      <div>
+        <button class="btn btn-primary" type="submit">Add Item</button>
+        <a class="btn btn-primary" href="{% url 'home' %}">Back To Home</a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

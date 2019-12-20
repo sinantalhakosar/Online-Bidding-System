@@ -2,8 +2,8 @@
 <h2>Sign up</h2>
 <form method="post">
   {% csrf_token %} {{ form.as_p }}
-  <button class="btn" type="submit">Sign up</button>
+  <button class="btn btn-primary" type="submit">Sign up</button>
+  <a class="btn btn-secondary" href="{% url 'login' %}">Back To Login</a>
 </form>
-<a class="btn" href="{% url 'login' %}">Back To Login</a>
 
 {% endblock %}

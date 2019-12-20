@@ -1,6 +1,6 @@
 {% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content %} {% if user.is_authenticated and user.auctionuser.is_verified %}
 <div>
-  <div style="text-align:center">Hi {{ user.username }}! Welcome to Auction App!!</div>
+  <div id="notification" style="text-align:center">Hi {{ user.username }}! Welcome to Auction App!!</div>
   <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'newitem' %}">Add Item</a></p>
   <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'logout' %}">Shopping</a></p>
   <p style="float: right;margin: 10px;"><a class="btn btn-primary" id="stop">Stop Auction</a></p>
@@ -22,7 +22,7 @@
         </div>
         <div class="modal-body">
           <label>Stop Bid:</label>
-          <input type="number"></input>
+          <input type="number" id="stopbid"></input>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -55,90 +55,118 @@
       <tr>
         <td>
           <div class="radio">
-            <label><input type="radio" id="{{ r.title }}" name="optradio"/></label>
+            <label><input type="radio" id="{{ r.id }}" name="optradio"/></label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.owner }}</label>
+            <label for="{{ r.id }}">{{ r.owner }}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.newowner }}</label>
+            <label for="{{ r.id }}">{{ r.newowner }}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.state }}</label>
+            <label for="{{ r.id }}">{{ r.state }}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.price}}</label>
+            <label for="{{ r.id }}">{{ r.price}}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.title }}</label>
+            <label for="{{ r.id }}">{{ r.title }}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.itemtype}}</label>
+            <label for="{{ r.id }}">{{ r.itemtype}}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.description }}</label>
+            <label for="{{ r.id }}">{{ r.description }}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.bidtype }}</label>
+            <label for="{{ r.id }}">{{ r.bidtype }}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.starting}}</label>
+            <label for="{{ r.id }}">{{ r.starting}}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.minbid}}</label>
+            <label for="{{ r.id }}">{{ r.minbid}}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.image}}</label>
+            <label for="{{ r.id }}">{{ r.image}}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.stopbid}}</label>
+            <label for="{{ r.id }}">{{ r.stopbid}}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.currentbid}}</label>
+            <label for="{{ r.id }}">{{ r.currentbid}}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.lastbidder}}</label>
+            <label for="{{ r.id }}">{{ r.lastbidder}}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.title }}">{{ r.decremented}}</label>
+            <label for="{{ r.id }}">{{ r.decremented}}</label>
           </div>
         </td>
       </tr>
       {% endfor %}
     </table>
   </div>
+  <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'change_password' %}">Password Reset</a></p>
   <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'logout' %}">Log Out</a></p>
 </div>
+
+
+<script>
+  // yanit idli linke tıklanırsa çalış
+  $(document).ready(function() {
+    $('#start').on('click', function (event) {
+      var stopbid = $("#stopbid").val();
+      var itemid = $('input[name="optradio"]:checked').attr("id");
+      console.log(stopbid)
+      console.log(itemid)
+      $.ajax({
+          url: "{% url 'startauction' %}",
+          method: 'POST',
+          dataType: 'json',
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+            stopbid: stopbid,
+            itemid:itemid,
+          }
+      }).done(function (response) {
+          $('#exampleModal').modal('toggle');
+          $('#notification').text(response.msg);
+      });
+      event.preventDefault();
+    });
+  });
+</script>
 
 {% elif user.is_authenticated and not user.auctionuser.is_verified %}
 <p>Your account is not verified</p>
@@ -148,7 +176,9 @@
   <button class="btn" type="submit">Verify</button>
 </form>
 {% else %}
+<div style="margin: auto;width: intrinsic;">
 <p>You are not logged in</p>
-<a class="btn" href="{% url 'login' %}">Login</a>
-<a class="btn" href="{% url 'signup' %}">Register</a>
+<a class="btn btn-primary" href="{% url 'login' %}">Login</a>
+<a class="btn btn-primary" href="{% url 'signup' %}">Register</a>
 {% endif %} {% endblock %}
+</div>

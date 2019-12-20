@@ -1,9 +1,30 @@
-from django.shortcuts import redirect
-from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import redirect, render
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
 from django.views.generic import *
 from django.urls import reverse_lazy, reverse
 from .models import *
 from .forms import *
+from django.http import JsonResponse
+
+
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(
+                request, 'Your password was successfully updated!')
+            return redirect('home')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'accounts/change_password.html', {
+        'form': form
+    })
 
 
 class HomePageView(ListView):
@@ -40,5 +61,33 @@ class AddItem(CreateView):
         self.object.owner = self.request.user.username
         self.object.state = "onhold"
         self.object.price = 0
+        if(self.object.minbid < self.object.starting):
+            self.object.minbid = self.object.starting
         self.object.save()
         return reverse('home')
+
+
+def startauction(request):
+    body = request.POST
+    print(body)
+    itemid = body.__getitem__("itemid")
+    item = Item.objects.get(id=int(itemid))
+    stopbid = body.__getitem__("stopbid")
+    print(itemid)
+    print(stopbid)
+    response = {}
+    if (stopbid == ""):
+        item.state = "active"
+        item.save()
+        response['msg'] = "The auction had started"
+        return JsonResponse(response)
+    else:
+        if(int(stopbid) < item.minbid):
+            response['msg'] = "Stop bid can not be less than min bid"
+            return JsonResponse(response)
+        else:
+            item.state = "active"
+            item.stopbid = int(stopbid)
+            item.save()
+            response['msg'] = "The auction had started"
+            return JsonResponse(response)
