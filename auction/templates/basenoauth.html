@@ -37,20 +37,7 @@
   </head>
   <body style="margin-left: 20px;">
     <main>
-      {% if user.is_authenticated and user.auctionuser.is_verified %} {% block content %} {% endblock %} {% elif not user.auctionuser.is_verified and user.is_authenticated %}
-      <p>Your account is not verified</p>
-      <form action="{% url 'verify' %}" method="post">
-        <input id="verification_code" type="text" name="verification_code" placeholder="Verification Code" />
-        {% csrf_token %} {{ form.as_p }}
-        <button class="btn btn-primary" type="submit">Verify</button>
-      </form>
-      {% else %}
-      <div style="margin: auto;width: intrinsic;">
-        <p>You are not logged in</p>
-        <a class="btn btn-primary" href="{% url 'login' %}">Login</a>
-        <a class="btn btn-primary" href="{% url 'signup' %}">Register</a>
-      </div>
-      {% endif %}
+      {% block content %} {% endblock %}
     </main>
   </body>
 </html>

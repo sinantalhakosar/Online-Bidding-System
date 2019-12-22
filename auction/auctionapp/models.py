@@ -10,7 +10,6 @@ class AuctionUser(models.Model):
     verification_code = models.CharField(max_length=100, blank=True)
     balance = models.IntegerField(blank=True, default=0)
     reservedbalance = models.IntegerField(blank=True, default=0)
-    active = models.BooleanField(blank=True, default=False)
 
     def __str__(self):
         return self.user.username
@@ -29,10 +28,10 @@ class AuctionUser(models.Model):
 class Item(models.Model):
     BID_TYPE = (
         ('I', 'Increment'),
-        ('AI', 'Auto-Increment'),
+        ('II', 'Instant-Increment'),
         ('D', 'Decrement'),
     )
-    owner = models.CharField(max_length=100, blank=True)
+    owner = models.CharField(max_length=100)
     newowner = models.CharField(max_length=100, blank=True)
     state = models.CharField(max_length=100, blank=True)
     price = models.IntegerField(blank=True)
@@ -47,6 +46,31 @@ class Item(models.Model):
     currentbid = models.IntegerField(blank=True)
     lastbidder = models.CharField(max_length=100, blank=True)
     decremented = models.IntegerField(blank=True)
+    period = models.IntegerField(blank=True, default=1)
+    delta = models.IntegerField(blank=True, default=10)
+    stop = models.IntegerField(blank=True, default=0)
 
     def __str__(self):
         return self.owner
+
+
+class Notification(models.Model):
+    userid = models.IntegerField()
+    message = models.CharField(max_length=100)
+    isread = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.message
+
+
+class History(models.Model):
+    itemid = models.IntegerField()
+    historytype = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
+    issold = models.BooleanField(default=False)
+    soldto = models.CharField(max_length=100)
+    bidder = models.CharField(max_length=100)
+    bidamount = models.IntegerField()
+
+    def __str__(self):
+        return self.historytype

@@ -1,28 +1,35 @@
-{% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content %} {% if user.is_authenticated and user.auctionuser.is_verified %}
+{% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content %} 
 <div>
   <div id="notification" style="text-align:center">Hi {{ user.username }}! Welcome to Auction App!!</div>
   <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'newitem' %}">Add Item</a></p>
-  <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'logout' %}">Shopping</a></p>
-  <p style="float: right;margin: 10px;"><a class="btn btn-primary" id="stop">Stop Auction</a></p>
+  <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'market' %}">Shopping</a></p>
+  <button style="float: left;margin: 10px;" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal3">
+    Watch
+  </button>
+  <button style="float: left;margin: 10px;" type="button" class="btn btn-primary" id="watchselected">
+    Watch Selected
+  </button>
+  <button style="float: left;margin: 10px;" type="button" class="btn btn-primary" id="notify" data-toggle="modal" data-target="#exampleModal2">
+    Notifications
+  </button>
+    <p style="float: right;margin: 10px;"><a class="btn btn-primary" id="sell">Sell Item</a></p>
 
-  <!-- Button trigger modal -->
-  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" id="startauc" data-toggle="modal" data-target="#exampleModal">
     Start Auction
   </button>
 
-  <!-- Modal -->
   <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Start Auction</h5>
+          <h5 class="modal-title" id="exampleModalLabel" >Start Auction</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <label>Stop Bid:</label>
-          <input type="number" id="stopbid"></input>
+          <label id="modaltext">Stop Bid:</label>
+          <input type="number" id="modelvalue"></input>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -31,8 +38,54 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel2" >Notifications</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-notification">
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="exampleModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel3" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel3" >Watch</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-notification">
+          <label id="modaltext">Item Type:</label>
+          <input type="number" id="itemtype"></input>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="watch">Watch</button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <input class="form-control" id="myInput" type="text" placeholder="Search..">
+  <br>
   <div class="table-responsive">
     <table class="table">
+      <thead>
       <tr>
         <th></th>
         <th>Owner</th>
@@ -45,12 +98,16 @@
         <th>Bid Type</th>
         <th>Starting</th>
         <th>Min Bid</th>
-        <th>Image</th>
         <th>Stop Bid</th>
+        <th>Period</th>
+        <th>Delta</th>
+        <th>Stop</th>
         <th>Current Bid</th>
         <th>Last Bidder</th>
         <th>Decremented</th>
       </tr>
+    </thead>
+    <tbody id="myTable"> 
       {% for r in items %}
       <tr>
         <td>
@@ -110,12 +167,22 @@
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.image}}</label>
+            <label for="{{ r.id }}">{{ r.stopbid}}</label>
           </div>
         </td>
         <td>
           <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.stopbid}}</label>
+            <label for="{{ r.id }}">{{ r.period}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.id }}">{{ r.delta}}</label>
+          </div>
+        </td>
+        <td>
+          <div class="radiotext">
+            <label for="{{ r.id }}">{{ r.stop}}</label>
           </div>
         </td>
         <td>
@@ -135,50 +202,141 @@
         </td>
       </tr>
       {% endfor %}
+    </tbody>
     </table>
   </div>
   <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'change_password' %}">Password Reset</a></p>
   <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'logout' %}">Log Out</a></p>
+  <button style="float: right;margin: 10px;" id="addbalance" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+    Add Balance
+  </button>
+  <h4 style="margin: 10px;">Balance: {{user.auctionuser.balance}}</h4>
+  <h4 style="margin: 10px;">Reserved Balance: {{user.auctionuser.reservedbalance}}</h4>
+
 </div>
-
-
 <script>
-  // yanit idli linke tıklanırsa çalış
   $(document).ready(function() {
     $('#start').on('click', function (event) {
-      var stopbid = $("#stopbid").val();
+      if ($(this).text() === "Start"){
+        var stopbid = $("#modelvalue").val();
+        var itemid = $('input[name="optradio"]:checked').attr("id");
+        $.ajax({
+            url: "{% url 'startauction' %}",
+            method: 'POST',
+            dataType: 'json',
+            data: {
+              csrfmiddlewaretoken: "{{ csrf_token }}",
+              stopbid: stopbid,
+              itemid:itemid,
+            }
+        }).done(function (response) {
+            $('#exampleModal').modal('toggle');
+            $('#notification').text(response.msg);
+        });
+        event.preventDefault();
+      }else{
+        var amount = $("#modelvalue").val();
+        $.ajax({
+            url: "{% url 'addbalance' %}",
+            method: 'POST',
+            dataType: 'json',
+            data: {
+              csrfmiddlewaretoken: "{{ csrf_token }}",
+              amount: amount,
+            }
+        }).done(function (response) {
+            $('#exampleModal').modal('toggle');
+            $('#notification').text(response.msg);
+        });
+        event.preventDefault();
+      }
+    });
+    $('#sell').on('click', function (event) {
       var itemid = $('input[name="optradio"]:checked').attr("id");
-      console.log(stopbid)
-      console.log(itemid)
       $.ajax({
-          url: "{% url 'startauction' %}",
+          url: "{% url 'sellitem' %}",
           method: 'POST',
           dataType: 'json',
           data: {
             csrfmiddlewaretoken: "{{ csrf_token }}",
-            stopbid: stopbid,
             itemid:itemid,
           }
       }).done(function (response) {
-          $('#exampleModal').modal('toggle');
           $('#notification').text(response.msg);
       });
       event.preventDefault();
     });
+    $("#myInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#myTable tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    });
   });
+  $('#addbalance').on('click', function (event) {
+      var modaltitletxt = $('#exampleModalLabel')
+      modaltitletxt.text("Add Balance")
+      var modaltxt = $('#modaltext')
+      modaltxt.text("Balance Amount:")
+      var modelbuttontxt = $('#start')
+      modelbuttontxt.text("Add")
+      event.preventDefault();
+    });
+    $('#notify').on('click', function (event) {
+      $.ajax({
+          url: "{% url 'notify' %}",
+          method: 'POST',
+          dataType: 'json',
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+          }
+      }).done(function (response) {
+        response.msg.forEach(element => {
+          $('#modal-notification').append("<div style='text-align:left'>-"+element+"</div>")
+        });
+      });
+      event.preventDefault();
+    });
+    $('#watch').on('click', function (event) {
+      var itemtype = $("#itemtype").val();
+      $.ajax({
+          url: "{% url 'watch' %}",
+          method: 'POST',
+          dataType: 'json',
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+            itemtype:itemtype
+          }
+      }).done(function (response) {
+          $('#exampleModal3').modal('toggle');
+          $('#notification').text(response.msg);
+      });
+      event.preventDefault();
+    });
+    $('#watchselected').on('click', function (event) {
+      var itemid = $('input[name="optradio"]:checked').attr("id");
+      $.ajax({
+          url: "{% url 'watchselected' %}",
+          method: 'POST',
+          dataType: 'json',
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+            itemid:itemid
+          }
+      }).done(function (response) {
+          $('#notification').text(response.msg);
+      });
+      event.preventDefault();
+    });
+    $('#startauc').on('click', function (event) {
+      var modaltitletxt = $('#exampleModalLabel')
+      modaltitletxt.text("Start Auction")
+      var modaltxt = $('#modaltext')
+      modaltxt.text("Stop Bid:")
+      var modelbuttontxt = $('#start')
+      modelbuttontxt.text("Start")
+      event.preventDefault();
+    });
 </script>
 
-{% elif user.is_authenticated and not user.auctionuser.is_verified %}
-<p>Your account is not verified</p>
-<form action="{% url 'verify' %}" method="post">
-  <input id="verification_code" type="text" name="verification_code" placeholder="Verification Code" />
-  {% csrf_token %} {{ form.as_p }}
-  <button class="btn" type="submit">Verify</button>
-</form>
-{% else %}
-<div style="margin: auto;width: intrinsic;">
-<p>You are not logged in</p>
-<a class="btn btn-primary" href="{% url 'login' %}">Login</a>
-<a class="btn btn-primary" href="{% url 'signup' %}">Register</a>
-{% endif %} {% endblock %}
-</div>
+ {% endblock %}

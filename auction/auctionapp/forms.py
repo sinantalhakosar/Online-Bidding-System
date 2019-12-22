@@ -6,4 +6,4 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
         fields = ['title', 'itemtype', 'description',
-                  'bidtype', 'starting', 'minbid', 'image']
+                  'bidtype', 'starting', 'minbid', 'image', 'period', 'delta', 'stop']

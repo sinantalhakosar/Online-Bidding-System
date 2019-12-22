@@ -25,13 +25,14 @@ SECRET_KEY = '!ltes9gsf3#0xwid@_#rt!88ml5v9opp11-%2u71qk)c3stbpe'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'auctionapp.apps.AuctionappConfig',
+    'background_task',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -126,3 +127,5 @@ STATIC_URL = '/auctionapp/static/'
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+
+BACKGROUND_TASK_RUN_ASYNC = True
