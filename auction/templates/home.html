@@ -1,28 +1,39 @@
-{% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content %} 
+{% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content %}
 <div>
   <div id="notification" style="text-align:center">Hi {{ user.username }}! Welcome to Auction App!!</div>
   <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'newitem' %}">Add Item</a></p>
   <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'market' %}">Shopping</a></p>
-  <button style="float: left;margin: 10px;" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal3">
+  <button style="float: left;margin: 10px;" type="button" class="btn btn-primary" data-toggle="modal"
+    data-target="#exampleModal3">
     Watch
   </button>
-  <button style="float: left;margin: 10px;" type="button" class="btn btn-primary" id="watchselected">
-    Watch Selected
-  </button>
-  <button style="float: left;margin: 10px;" type="button" class="btn btn-primary" id="notify" data-toggle="modal" data-target="#exampleModal2">
+
+  <button style="float: left;margin: 10px;" type="button" class="btn btn-primary" id="notify" data-toggle="modal"
+    data-target="#exampleModal2">
     Notifications
   </button>
-    <p style="float: right;margin: 10px;"><a class="btn btn-primary" id="sell">Sell Item</a></p>
+  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" id="history" data-toggle="modal"
+    data-target="#exampleModal4">
+    Item History
+  </button>
+  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" id="report" data-toggle="modal"
+    data-target="#exampleModal5">
+    Get Report
+  </button>
+  <p class="btn btn-primary" style="float: right;margin: 10px;"><a id="sell">Sell Item</a></p>
 
-  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" id="startauc" data-toggle="modal" data-target="#exampleModal">
+  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" id="startauc" data-toggle="modal"
+    data-target="#exampleModal">
     Start Auction
   </button>
 
-  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel" >Start Auction</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Start Auction</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -39,11 +50,12 @@
     </div>
   </div>
 
-  <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+  <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel2" >Notifications</h5>
+          <h5 class="modal-title" id="exampleModalLabel2">Notifications</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -58,18 +70,19 @@
     </div>
   </div>
 
-  <div class="modal fade" id="exampleModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel3" aria-hidden="true">
+  <div class="modal fade" id="exampleModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel3"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel3" >Watch</h5>
+          <h5 class="modal-title" id="exampleModalLabel3">Watch</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body" id="modal-notification">
           <label id="modaltext">Item Type:</label>
-          <input type="number" id="itemtype"></input>
+          <input type="text" id="itemtype"></input>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -80,134 +93,184 @@
     </div>
   </div>
 
+  <div class="modal fade" id="exampleModal4" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel4"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document" style="margin: 0px;
+    max-width: 100%;
+    margin-top: 80px;">
+      <div class="modal-content" style="width: 100%;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel4">Item History</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-notification">
+          <div class="modal-body" id="modal-history">
 
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="exampleModal5" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel5"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document" style="margin: 0px;
+    max-width: 100%;
+    margin-top: 80px;">
+      <div class="modal-content" style="width: 100%;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel5">User Report</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-notification">
+          <div class="modal-body" id="modal-report">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <input class="form-control" id="myInput" type="text" placeholder="Search..">
   <br>
   <div class="table-responsive">
     <table class="table">
       <thead>
-      <tr>
-        <th></th>
-        <th>Owner</th>
-        <th>New Owner</th>
-        <th>State</th>
-        <th>Price</th>
-        <th>Title</th>
-        <th>Item Type</th>
-        <th>Description</th>
-        <th>Bid Type</th>
-        <th>Starting</th>
-        <th>Min Bid</th>
-        <th>Stop Bid</th>
-        <th>Period</th>
-        <th>Delta</th>
-        <th>Stop</th>
-        <th>Current Bid</th>
-        <th>Last Bidder</th>
-        <th>Decremented</th>
-      </tr>
-    </thead>
-    <tbody id="myTable"> 
-      {% for r in items %}
-      <tr>
-        <td>
-          <div class="radio">
-            <label><input type="radio" id="{{ r.id }}" name="optradio"/></label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.owner }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.newowner }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.state }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.price}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.title }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.itemtype}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.description }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.bidtype }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.starting}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.minbid}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.stopbid}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.period}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.delta}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.stop}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.currentbid}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.lastbidder}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.decremented}}</label>
-          </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
+        <tr>
+          <th></th>
+          <th>Owner</th>
+          <th>New Owner</th>
+          <th>State</th>
+          <th>Price</th>
+          <th>Title</th>
+          <th>Item Type</th>
+          <th>Description</th>
+          <th>Bid Type</th>
+          <th>Starting</th>
+          <th>Min Bid</th>
+          <th>Stop Bid</th>
+          <th>Period</th>
+          <th>Delta</th>
+          <th>Stop</th>
+          <th>Current Bid</th>
+          <th>Last Bidder</th>
+          <th>Decremented</th>
+        </tr>
+      </thead>
+      <tbody id="myTable">
+        {% for r in items %}
+        <tr>
+          <td>
+            <div class="radio">
+              <label><input type="radio" id="{{ r.id }}" name="optradio" /></label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.owner }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.newowner }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.state }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.price}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.title }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.itemtype}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.description }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.bidtype }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.starting}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.minbid}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.stopbid}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.period}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.delta}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.stop}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.currentbid}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.lastbidder}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.decremented}}</label>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
-  <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'change_password' %}">Password Reset</a></p>
+  <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'change_password' %}">Password
+      Reset</a>
+  </p>
   <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'logout' %}">Log Out</a></p>
-  <button style="float: right;margin: 10px;" id="addbalance" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+  <button style="float: right;margin: 10px;" id="addbalance" type="button" class="btn btn-primary" data-toggle="modal"
+    data-target="#exampleModal">
     Add Balance
   </button>
   <h4 style="margin: 10px;">Balance: {{user.auctionuser.balance}}</h4>
@@ -215,38 +278,38 @@
 
 </div>
 <script>
-  $(document).ready(function() {
+  $(document).ready(function () {
     $('#start').on('click', function (event) {
-      if ($(this).text() === "Start"){
+      if ($(this).text() === "Start") {
         var stopbid = $("#modelvalue").val();
         var itemid = $('input[name="optradio"]:checked').attr("id");
         $.ajax({
-            url: "{% url 'startauction' %}",
-            method: 'POST',
-            dataType: 'json',
-            data: {
-              csrfmiddlewaretoken: "{{ csrf_token }}",
-              stopbid: stopbid,
-              itemid:itemid,
-            }
+          url: "{% url 'startauction' %}",
+          method: 'POST',
+          dataType: 'json',
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+            stopbid: stopbid,
+            itemid: itemid,
+          }
         }).done(function (response) {
-            $('#exampleModal').modal('toggle');
-            $('#notification').text(response.msg);
+          $('#exampleModal').modal('toggle');
+          $('#notification').text(response.msg);
         });
         event.preventDefault();
-      }else{
+      } else {
         var amount = $("#modelvalue").val();
         $.ajax({
-            url: "{% url 'addbalance' %}",
-            method: 'POST',
-            dataType: 'json',
-            data: {
-              csrfmiddlewaretoken: "{{ csrf_token }}",
-              amount: amount,
-            }
+          url: "{% url 'addbalance' %}",
+          method: 'POST',
+          dataType: 'json',
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+            amount: amount,
+          }
         }).done(function (response) {
-            $('#exampleModal').modal('toggle');
-            $('#notification').text(response.msg);
+          $('#exampleModal').modal('toggle');
+          $('#notification').text(response.msg);
         });
         event.preventDefault();
       }
@@ -254,89 +317,108 @@
     $('#sell').on('click', function (event) {
       var itemid = $('input[name="optradio"]:checked').attr("id");
       $.ajax({
-          url: "{% url 'sellitem' %}",
-          method: 'POST',
-          dataType: 'json',
-          data: {
-            csrfmiddlewaretoken: "{{ csrf_token }}",
-            itemid:itemid,
-          }
+        url: "{% url 'sellitem' %}",
+        method: 'POST',
+        dataType: 'json',
+        data: {
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+          itemid: itemid,
+        }
       }).done(function (response) {
-          $('#notification').text(response.msg);
+        console.log(response)
+        $('#notification').text(response.msg);
       });
       event.preventDefault();
     });
-    $("#myInput").on("keyup", function() {
+    $("#myInput").on("keyup", function () {
       var value = $(this).val().toLowerCase();
-      $("#myTable tr").filter(function() {
+      $("#myTable tr").filter(function () {
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
       });
     });
   });
   $('#addbalance').on('click', function (event) {
-      var modaltitletxt = $('#exampleModalLabel')
-      modaltitletxt.text("Add Balance")
-      var modaltxt = $('#modaltext')
-      modaltxt.text("Balance Amount:")
-      var modelbuttontxt = $('#start')
-      modelbuttontxt.text("Add")
-      event.preventDefault();
-    });
-    $('#notify').on('click', function (event) {
-      $.ajax({
-          url: "{% url 'notify' %}",
-          method: 'POST',
-          dataType: 'json',
-          data: {
-            csrfmiddlewaretoken: "{{ csrf_token }}",
-          }
-      }).done(function (response) {
-        response.msg.forEach(element => {
-          $('#modal-notification').append("<div style='text-align:left'>-"+element+"</div>")
-        });
+    var modaltitletxt = $('#exampleModalLabel')
+    modaltitletxt.text("Add Balance")
+    var modaltxt = $('#modaltext')
+    modaltxt.text("Balance Amount:")
+    var modelbuttontxt = $('#start')
+    modelbuttontxt.text("Add")
+    event.preventDefault();
+  });
+  $('#notify').on('click', function (event) {
+    $.ajax({
+      url: "{% url 'notify' %}",
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+      }
+    }).done(function (response) {
+      response.msg.forEach(element => {
+        $('#modal-notification').append("<div style='text-align:left'>-" + element + "</div>")
       });
-      event.preventDefault();
     });
-    $('#watch').on('click', function (event) {
-      var itemtype = $("#itemtype").val();
-      $.ajax({
-          url: "{% url 'watch' %}",
-          method: 'POST',
-          dataType: 'json',
-          data: {
-            csrfmiddlewaretoken: "{{ csrf_token }}",
-            itemtype:itemtype
-          }
-      }).done(function (response) {
-          $('#exampleModal3').modal('toggle');
-          $('#notification').text(response.msg);
+    event.preventDefault();
+  });
+  $('#watch').on('click', function (event) {
+    var itemtype = $("#itemtype").val();
+    $.ajax({
+      url: "{% url 'watch' %}",
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+        itemtype: itemtype
+      }
+    }).done(function (response) {
+      $('#exampleModal3').modal('toggle');
+      $('#notification').text(response.msg);
+    });
+    event.preventDefault();
+  });
+
+  $('#startauc').on('click', function (event) {
+    var modaltitletxt = $('#exampleModalLabel')
+    modaltitletxt.text("Start Auction")
+    var modaltxt = $('#modaltext')
+    modaltxt.text("Stop Bid:")
+    var modelbuttontxt = $('#start')
+    modelbuttontxt.text("Start")
+    event.preventDefault();
+  });
+  $('#history').on('click', function (event) {
+    var itemid = $('input[name="optradio"]:checked').attr("id");
+    $.ajax({
+      url: "{% url 'history' %}",
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+        itemid: itemid,
+      }
+    }).done(function (response) {
+      var history = JSON.parse(response.msg)
+      history.forEach(element => {
+        console.log(element.fields)
+        $('#modal-history').append("<div style='text-align:left'>-" + JSON.stringify(element.fields) + "</div>")
       });
-      event.preventDefault();
     });
-    $('#watchselected').on('click', function (event) {
-      var itemid = $('input[name="optradio"]:checked').attr("id");
-      $.ajax({
-          url: "{% url 'watchselected' %}",
-          method: 'POST',
-          dataType: 'json',
-          data: {
-            csrfmiddlewaretoken: "{{ csrf_token }}",
-            itemid:itemid
-          }
-      }).done(function (response) {
-          $('#notification').text(response.msg);
-      });
-      event.preventDefault();
+    event.preventDefault();
+  });
+  $('#report').on('click', function (event) {
+    $.ajax({
+      url: "{% url 'report' %}",
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+      }
+    }).done(function (response) {
+      $('#modal-report').append("<div style='text-align:left;white-space: pre-line;'>" + response.msg + "</div>")
     });
-    $('#startauc').on('click', function (event) {
-      var modaltitletxt = $('#exampleModalLabel')
-      modaltitletxt.text("Start Auction")
-      var modaltxt = $('#modaltext')
-      modaltxt.text("Stop Bid:")
-      var modelbuttontxt = $('#start')
-      modelbuttontxt.text("Start")
-      event.preventDefault();
-    });
+    event.preventDefault();
+  });
 </script>
 
- {% endblock %}
+{% endblock %}

@@ -82,3 +82,14 @@ python3 tests.py
 ```
 
 And you will able to see the results on the terminal and the database.
+
+```
+pip3 install django==2.2.8
+pip3 install djongo
+pip3 install django-background-tasks
+python manage.py migrate --fake auctionapp zero
+python manage.py makemigrations auctionapp
+python manage.py migrate
+python manage.py runserver
+python manage.py process_tasks
+```

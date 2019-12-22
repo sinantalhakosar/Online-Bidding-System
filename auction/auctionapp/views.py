@@ -10,6 +10,8 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.db.models import Q
 from .tasks import *
+from django.core import serializers
+import json
 
 
 def change_password(request):
@@ -104,6 +106,9 @@ def startauction(request):
         return JsonResponse(response)
     else:
         if (stopbid == ""):
+            if(item.bidtype == "II"):
+                response['msg'] = "Stop bid can not be empty for instant increment"
+                return JsonResponse(response)
             item.state = "active"
             item.save()
             if item.bidtype == "D":
@@ -133,7 +138,7 @@ def sellitem(request):
         response['msg'] = "This item is not sold anyone because there is no bidder, its state is now onhold."
         return JsonResponse(response)
     if (item.state == "sold"):
-        response['msg'] = "You cannot sell already solded item."
+        response['msg'] = "You can not sell already solded item."
         return JsonResponse(response)
     item.price = item.currentbid
     newowner = User.objects.get(username=item.lastbidder)
@@ -149,7 +154,7 @@ def sellitem(request):
                            issold=True,
                            soldto=item.newowner)
     response['msg'] = "Item is sold for {0} and the new owner is {1}".format(
-        item.price, newowner.user.username)
+        item.price, newowner.username)
     return JsonResponse(response)
 
 
@@ -184,12 +189,13 @@ def bid(request):
                         return JsonResponse(response)
                     else:
                         if(amount > item.currentbid):
-                            item.currentbid = amount
                             if (item.lastbidder != ""):
-                                lastbidder = User.objects.filter(
+                                lastbidder = User.objects.get(
                                     username=item.lastbidder)
-                                lastbidder.auctionuser.reservedbalance -= amount
+                                lastbidder.auctionuser.reservedbalance -= item.currentbid
                                 lastbidder.save()
+                            item.currentbid = amount
+                            user = User.objects.get(id=user.id)
                             item.lastbidder = user.username
                             user.auctionuser.reservedbalance += amount
                             item.save()
@@ -239,7 +245,7 @@ def bid(request):
             if(user.auctionuser.balance - user.auctionuser.reservedbalance >= amount):
                 if(item.stopbid != 0 and amount+item.currentbid >= item.stopbid):
                     item.price = amount
-                    item.newowner = user
+                    item.newowner = user.username
                     item.state = "sold"
                     user.auctionuser.balance -= amount
                     item.save()
@@ -254,7 +260,7 @@ def bid(request):
                     return JsonResponse(response)
                 else:
                     item.currentbid += amount
-                    item.lastbidder = user
+                    item.lastbidder = user.username
                     user.auctionuser.balance -= amount
                     user.save()
                     item.save()
@@ -318,6 +324,50 @@ def history(request):
     notify_user_item(user.id, int(itemid))
     response = {}
     response['msg'] = []
-    for e in History.objects.filter(itemid=int(itemid)):
-        response['msg'].append(e)
+    e = serializers.serialize(
+        "json", History.objects.filter(itemid=int(itemid)))
+    print(e)
+    response['msg'].append(e)
+    return JsonResponse(response)
+
+
+def report(request):
+    items = serializers.serialize(
+        "json", Item.objects.filter(owner=request.user.username))
+    itemlist = list(json.loads(items))
+    boughtitems = serializers.serialize(
+        "json", Item.objects.filter(newowner=request.user.username))
+    boughtitemlist = list(json.loads(boughtitems))
+    response = {}
+    solditems = []
+    onsaleitems = []
+    income = 0
+    expense = 0
+    for item in itemlist:
+        if(item["fields"]["state"] == "sold"):
+            solditems.append(item)
+            income = income + int(item["fields"]["price"])
+        else:
+            onsaleitems.append(item)
+
+    for item in boughtitemlist:
+        expense = expense + int(item["fields"]["price"])
+    returnstring = ""
+    returnstring += "You sold this items:\n"
+    for item in solditems:
+        print(item)
+        returnstring += "- " + item["fields"]["title"] + "\n"
+    returnstring += "You have this items onsale:\n"
+    for item in onsaleitems:
+        print(item)
+        returnstring += "- " + item["fields"]["title"] + "\n"
+    returnstring += "You bought this items:\n"
+    for item in boughtitemlist:
+        print(item)
+        returnstring += "- " + item["fields"]["title"] + "\n"
+    returnstring += "Your income is {0}$".format(income)
+
+    returnstring += "\nYour expense is {0}$".format(expense)
+    response['msg'] = []
+    response['msg'].append(returnstring)
     return JsonResponse(response)

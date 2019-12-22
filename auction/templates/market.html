@@ -1,15 +1,19 @@
-{% extends 'base.html' %} {% block title %}Market Place{% endblock %} {% block content %} 
+{% extends 'base.html' %} {% block title %}Market Place{% endblock %} {% block content %}
 <div>
   <div id="notification" style="text-align:center">Hi {{ user.username }}! Welcome to Auction App Market Place!!</div>
   <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'home' %}">Home</a></p>
 
   <!-- Button trigger modal -->
-  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" data-toggle="modal"
+    data-target="#exampleModal">
     Bid Selected Item
   </button>
-
+  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" id="watchselected">
+    Watch Selected
+  </button>
   <!-- Modal -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -34,102 +38,109 @@
   <div class="table-responsive">
     <table class="table">
       <thead>
-      <tr>
-        <th></th>
-        <th>Seller</th>
-        <th>Title</th>
-        <th>Item Type</th>
-        <th>Description</th>
-        <th>Bid Type</th>
-        <th>Starting</th>
-        <th>Min Bid</th>
-        <th>Stop Bid</th>
-        <th>Period</th>
-        <th>Delta</th>
-        <th>Stop</th>
-        <th>Current Bid</th>
-        <th>Last Bidder</th>
-      </tr>
-    </thead>
-    <tbody id="myTable"> 
-      {% for r in items %}
-      <tr>
-        <td>
-          <div class="radio">
-            <label><input type="radio" id="{{ r.id }}" name="optradio"/></label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.owner }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.title }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.itemtype}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.description }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.bidtype }}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.starting}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.minbid}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.stopbid}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.period}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.delta}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.stop}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.currentbid}}</label>
-          </div>
-        </td>
-        <td>
-          <div class="radiotext">
-            <label for="{{ r.id }}">{{ r.lastbidder}}</label>
-          </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
+        <tr>
+          <th></th>
+          <th>Seller</th>
+          <th>Title</th>
+          <th>Item Type</th>
+          <th>Description</th>
+          <th>Bid Type</th>
+          <th>Starting</th>
+          <th>Decremented</th>
+          <th>Min Bid</th>
+          <th>Stop Bid</th>
+          <th>Period</th>
+          <th>Delta</th>
+          <th>Stop</th>
+          <th>Current Bid</th>
+          <th>Last Bidder</th>
+        </tr>
+      </thead>
+      <tbody id="myTable">
+        {% for r in items %}
+        <tr>
+          <td>
+            <div class="radio">
+              <label><input type="radio" id="{{ r.id }}" name="optradio" /></label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.owner }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.title }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.itemtype}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.description }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.bidtype }}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.starting}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.decremented}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.minbid}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.stopbid}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.period}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.delta}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.stop}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.currentbid}}</label>
+            </div>
+          </td>
+          <td>
+            <div class="radiotext">
+              <label for="{{ r.id }}">{{ r.lastbidder}}</label>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
-  <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'change_password' %}">Password Reset</a></p>
+  <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'change_password' %}">Password
+      Reset</a></p>
   <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'logout' %}">Log Out</a></p>
   <h4 style="margin: 10px;">Balance: {{user.auctionuser.balance}}</h4>
   <h4 style="margin: 10px;">Reserved Balance: {{user.auctionuser.reservedbalance}}</h4>
@@ -138,33 +149,48 @@
 
 
 <script>
-  $(document).ready(function() {
+  $(document).ready(function () {
     $('#bid').on('click', function (event) {
       var bidamount = $("#bidamount").val();
       var itemid = $('input[name="optradio"]:checked').attr("id");
       $.ajax({
-          url: "{% url 'bid' %}",
-          method: 'POST',
-          dataType: 'json',
-          data: {
-            csrfmiddlewaretoken: "{{ csrf_token }}",
-            bidamount: bidamount,
-            itemid:itemid,
-          }
+        url: "{% url 'bid' %}",
+        method: 'POST',
+        dataType: 'json',
+        data: {
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+          bidamount: bidamount,
+          itemid: itemid,
+        }
       }).done(function (response) {
         console.log(response)
-          $('#exampleModal').modal('toggle');
-          $('#notification').text(response.msg);
+        $('#exampleModal').modal('toggle');
+        $('#notification').text(response.msg);
       });
       event.preventDefault();
     });
-    $("#myInput").on("keyup", function() {
+    $("#myInput").on("keyup", function () {
       var value = $(this).val().toLowerCase();
-      $("#myTable tr").filter(function() {
+      $("#myTable tr").filter(function () {
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
       });
+    });
+    $('#watchselected').on('click', function (event) {
+      var itemid = $('input[name="optradio"]:checked').attr("id");
+      $.ajax({
+        url: "{% url 'watchselected' %}",
+        method: 'POST',
+        dataType: 'json',
+        data: {
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+          itemid: itemid
+        }
+      }).done(function (response) {
+        $('#notification').text(response.msg);
+      });
+      event.preventDefault();
     });
   });
 </script>
 
- {% endblock %}
+{% endblock %}

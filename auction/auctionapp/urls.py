@@ -16,6 +16,8 @@ urlpatterns = [
     path('notify/', views.notify, name="notify"),
     path('watch/', views.watch, name="watch"),
     path('watchselected/', views.watchselected, name="watchselected"),
+    path('history/', views.history, name="history"),
+    path('report/', views.report, name="report"),
     url(r'^password/$', views.change_password, name='change_password'),
 
 ]
