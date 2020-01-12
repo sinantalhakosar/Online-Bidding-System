@@ -1,196 +1,358 @@
-{% extends 'base.html' %} {% block title %}Market Place{% endblock %} {% block content %}
-<div>
-  <div id="notification" style="text-align:center">Hi {{ user.username }}! Welcome to Auction App Market Place!!</div>
-  <p style="float: left;margin: 10px;"><a class="btn btn-primary" href="{% url 'home' %}">Home</a></p>
-
-  <!-- Button trigger modal -->
-  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" data-toggle="modal"
-    data-target="#exampleModal">
-    Bid Selected Item
-  </button>
-  <button style="float: right;margin: 10px;" type="button" class="btn btn-primary" id="watchselected">
-    Watch Selected
-  </button>
-  <!-- Modal -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Start Auction</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <label>Bid Amount:</label>
-          <input type="number" id="bidamount"></input>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="bid">Bid</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <input class="form-control" id="myInput" type="text" placeholder="Search..">
-  <br>
-  <div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Seller</th>
-          <th>Title</th>
-          <th>Item Type</th>
-          <th>Description</th>
-          <th>Bid Type</th>
-          <th>Starting</th>
-          <th>Decremented</th>
-          <th>Min Bid</th>
-          <th>Stop Bid</th>
-          <th>Period</th>
-          <th>Delta</th>
-          <th>Stop</th>
-          <th>Current Bid</th>
-          <th>Last Bidder</th>
-        </tr>
-      </thead>
-      <tbody id="myTable">
-        {% for r in items %}
-        <tr>
-          <td>
-            <div class="radio">
-              <label><input type="radio" id="{{ r.id }}" name="optradio" /></label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.owner }}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.title }}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.itemtype}}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.description }}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.bidtype }}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.starting}}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.decremented}}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.minbid}}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.stopbid}}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.period}}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.delta}}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.stop}}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.currentbid}}</label>
-            </div>
-          </td>
-          <td>
-            <div class="radiotext">
-              <label for="{{ r.id }}">{{ r.lastbidder}}</label>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'change_password' %}">Password
-      Reset</a></p>
-  <p style="float: right;margin: 10px;"><a class="btn btn-secondary" href="{% url 'logout' %}">Log Out</a></p>
-  <h4 style="margin: 10px;">Balance: {{user.auctionuser.balance}}</h4>
-  <h4 style="margin: 10px;">Reserved Balance: {{user.auctionuser.reservedbalance}}</h4>
-
-</div>
-
-
-<script>
-  $(document).ready(function () {
-    $('#bid').on('click', function (event) {
-      var bidamount = $("#bidamount").val();
-      var itemid = $('input[name="optradio"]:checked').attr("id");
-      $.ajax({
-        url: "{% url 'bid' %}",
-        method: 'POST',
-        dataType: 'json',
-        data: {
-          csrfmiddlewaretoken: "{{ csrf_token }}",
-          bidamount: bidamount,
-          itemid: itemid,
-        }
-      }).done(function (response) {
-        console.log(response)
-        $('#exampleModal').modal('toggle');
-        $('#notification').text(response.msg);
-      });
-      event.preventDefault();
-    });
-    $("#myInput").on("keyup", function () {
-      var value = $(this).val().toLowerCase();
-      $("#myTable tr").filter(function () {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-      });
-    });
-    $('#watchselected').on('click', function (event) {
-      var itemid = $('input[name="optradio"]:checked').attr("id");
-      $.ajax({
-        url: "{% url 'watchselected' %}",
-        method: 'POST',
-        dataType: 'json',
-        data: {
-          csrfmiddlewaretoken: "{{ csrf_token }}",
-          itemid: itemid
-        }
-      }).done(function (response) {
-        $('#notification').text(response.msg);
-      });
-      event.preventDefault();
-    });
-  });
-</script>
-
+{% extends 'base.html' %}
+{% block title %}Market Place
 {% endblock %}
+{% block content %}
+    <head>
+        <script crossorigin="anonymous" src="https://kit.fontawesome.com/dbef93ebb0.js"></script>
+        <style>
+        ::-webkit-input-placeholder {
+            text-align: center;
+        }
+
+        :-moz-placeholder {
+            /* Firefox 18- */
+            text-align: center;
+        }
+
+        ::-moz-placeholder {
+            /* Firefox 19+ */
+            text-align: center;
+        }
+
+        :-ms-input-placeholder {
+            text-align: center;
+        }
+
+        .notification.icon {
+            position: relative;
+            font-size: 1em;
+            height: 40px;
+        }
+        .notification.icon .notification-number {
+            position: absolute;
+            right: -5px;
+            top: -15px;
+            z-index: 1;
+            background: #cc2311;
+            border: 3px solid #FFF;
+            border-radius: 50%;
+            padding-top: 5px;
+            height: 25px;
+            width: 25px;
+            font-family: sans-serif;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 10px;
+            color: #FFF;
+            /* -webkit-animation: bounce 1s;*/
+        }
+
+        @-webkit-keyframes bounce {
+            0,
+            100%,
+            20%,
+            53%,
+            80% {
+                -webkit-transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+                transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+                -webkit-transform: translate3d(0, 0, 0);
+                -ms-transform: translate3d(0, 0, 0);
+                transform: translate3d(0, 0, 0);
+            }
+            40%,
+            43% {
+                -webkit-transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+                transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+                -webkit-transform: translate3d(0, -30px, 0);
+                -ms-transform: translate3d(0, -30px, 0);
+                transform: translate3d(0, -30px, 0);
+            }
+            70% {
+                -webkit-transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+                transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+                -webkit-transform: translate3d(0, -15px, 0);
+                -ms-transform: translate3d(0, -15px, 0);
+                transform: translate3d(0, -15px, 0);
+            }
+            90% {
+                -webkit-transform: translate3d(0, -4px, 0);
+                -ms-transform: translate3d(0, -4px, 0);
+                transform: translate3d(0, -4px, 0);
+            }
+        }
+    </style>
+</head>
+<div>
+    <div class="row" style="display:flex;justify-content:flex-end;margin-right:2%">
+        <p style="float: left;margin: 10px;">
+            <a class="btn btn-secondary" href="{% url 'home' %}">
+                <i class="fa fa-home"></i>
+                Home</a>
+        </p>
+        <p style="float: right;margin: 10px;">
+            <a class="btn btn-secondary" href="{% url 'change_password' %}">
+                <i class="fa fa-key"></i>
+                Password
+                                        Reset</a>
+        </p>
+        <p style="float: right;margin: 10px;">
+            <a class="btn btn-secondary" href="{% url 'logout' %}">
+                <i class="fa fa-sign-out"></i>
+                Log Out</a>
+        </p>
+    </div>
+    <div class="row" id="notification" style="border-style:solid;border-color:rgb(0,125,251); border-width: 5px;;display:flex;justify-content:center;align-items:center;">Hi
+        {{ user.username }}! Welcome to Auction App Market Place!!</div>
+
+    <div
+        class="row" style="display:flex;justify-content:center;align-items:center">
+        <!-- Button trigger modal -->
+        <button class="btn btn-primary notification icon" data-target="#exampleModal2" data-toggle="modal" id="notify" style="float: left;margin: 10px;" type="button">
+            <i class="fa fa-flag"></i>
+            Notifications
+            <span class="notification-number" id="notification-count"></span>
+        </button>
+        <button class="btn btn-primary" data-target="#exampleModal" data-toggle="modal" style="float: right;margin: 10px;" type="button">
+            <i class="fa fa-gavel"></i>
+            Bid Selected Item
+        </button>
+        <button class="btn btn-primary" id="watchselected" style="float: right;margin: 10px;" type="button">
+            <i class="fa fa-eye"></i>
+            Watch Selected
+        </button>
+    </div>
+    <div class="row" style="display:flex;justify-content:center;align-items:center">
+        <h4 style="margin: 10px;">Balance:
+            {{ user.auctionuser.balance }}</h4>
+        <h4 style="margin: 10px;">Reserved Balance:
+            {{ user.auctionuser.reservedbalance }}</h4>
+    </div>
+    <!-- Modal -->
+    <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="exampleModal" role="dialog" tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Start Auction</h5>
+                    <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label>Bid Amount:</label>
+                    <input id="bidamount" type="number"></input>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+                    <button class="btn btn-primary" id="bid" type="button">Bid</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div aria-hidden="true" aria-labelledby="exampleModalLabel2" class="modal fade" id="exampleModal2" role="dialog" tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel2">Notifications</h5>
+                    <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-notification"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input class="form-control" id="myInput" placeholder="Search.." type="text">
+        <br>
+            <div class="table-responsive">
+                <table class="table" style="overflow-x:scroll;display:block;white-space: nowrap;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Seller</th>
+                            <th>Title</th>
+                            <th>Item Type</th>
+                            <th>Description</th>
+                            <th>Bid Type</th>
+                            <th>Starting</th>
+                            <th>Decremented</th>
+                            <th>Min Bid</th>
+                            <th>Stop Bid</th>
+                            <th>Period</th>
+                            <th>Delta</th>
+                            <th>Stop</th>
+                            <th>Current Bid</th>
+                            <th>Last Bidder</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        
+                    </tbody>
+                </table>
+            </div>
+
+
+        </div>
+
+
+        <script>
+            $(document).ready(function () {
+              var checkedid;
+                  var notmess = []
+                $.ajax({
+                    url: "{% url 'notify' %}",
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    }
+                }).done(function (response) {
+                    notmess = []
+                    response.msg.forEach(msg => notmess.push(msg))
+                });
+                $('#bid').on('click', function (event) {
+                    var bidamount = $("#bidamount").val();
+                    var itemid = checkedid;
+                    $.ajax({
+                        url: "{% url 'bid' %}",
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            csrfmiddlewaretoken: "{{ csrf_token }}",
+                            bidamount: bidamount,
+                            itemid: itemid
+                        }
+                    }).done(function (response) {
+                        console.log(response)
+                        $('#exampleModal').modal('toggle');
+                        $('#notification').text(response.msg);
+                    });
+                    event.preventDefault();
+                });
+                $("#myInput").on("keyup", function () {
+                    var value = $(this).val().toLowerCase();
+                    $("#myTable tr").filter(function () {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                });
+                $('#watchselected').on('click', function (event) {
+                    var itemid = checkedid;
+                    $.ajax({
+                        url: "{% url 'watchselected' %}",
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            csrfmiddlewaretoken: "{{ csrf_token }}",
+                            itemid: itemid
+                        }
+                    }).done(function (response) {
+                        $('#notification').text(response.msg);
+                    });
+                    event.preventDefault();
+                });
+            
+
+            $('#notify').on('click', function (event) {
+                $.ajax({
+                    url: "{% url 'notify' %}",
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    }
+                }).done(function (response) {
+                    $('#modal-notification').html("")
+                    response.msg.sort(function (a, b) {
+                        return a.isread - b.isread
+                    });
+                    response.msg.forEach(element => {
+                        if (element.isread === false) {
+                            $('#modal-notification').append("<div style='text-align:left;border:1px solid black;background-color:blue'>-" + element.notification + "</div>")
+                        } else {
+                            $('#modal-notification').append("<div style='text-align:left;border:1px solid black;'>-" + element.notification + "</div>")
+                        }
+                    });
+                });
+                $.ajax({
+                    url: "{% url 'readnotify' %}",
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    }
+                })
+                event.preventDefault();
+            });
+
+            
+            $("#myTable").on("click",".table-radio",function(){
+              var radioValue = $("input[name='optradioT']:checked");
+              if(radioValue){
+                  checkedid = radioValue.attr('id')
+              }
+          });
+
+            
+            setInterval(function () {
+                $.ajax({
+                    url: "{% url 'notify' %}",
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    }
+                }).done(function (response) {
+                    notmess = []
+                    response.msg.forEach(msg => notmess.push(msg))
+                });
+                $("#notification-count").html(notmess.filter(msg => msg.isread === false).length);
+
+                $.ajax({
+                  url: "{%url 'getMarketItems' %}",
+                  method: 'POST',
+                  dataType: 'json',
+                  data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                  }
+                }).done(function (response){
+                  //Table refresh
+
+                  appendhtml = "";
+                  response.msg.forEach(item=>{
+                    radiohtml="";
+                    if(parseInt(checkedid)===parseInt(item.id)){
+                      radiohtml = "<td><div class='radio'><label><input class='table-radio' type='radio' id='"+item.id+"' name='optradioT' checked/></label></div></td>"
+                    }else{
+                      radiohtml = "<td><div class='radio'><label><input class='table-radio' type='radio' id='"+item.id+"' name='optradioT'/></label></div></td>"
+                    }
+                    itemhtml = "<tr>"+
+                      radiohtml+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.owner+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.title+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.itemtype+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.description+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.bidtype+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.starting+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.decremented+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.minbid+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.stopbid+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.period+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.delta+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.stop+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.currentbid+"</label></div></td>"+
+                      "<td><div class='radiotext'><label for='"+ item.id +"'>"+item.lastbidder+"</label></div></td>"+
+                      "</tr>";
+                      appendhtml += itemhtml
+                  });
+                  
+                  $("#myTable").html(appendhtml)
+                })
+
+            }, 1000);
+          });
+        </script>
+
+    {% endblock %}

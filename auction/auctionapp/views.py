@@ -12,6 +12,7 @@ from django.db.models import Q
 from .tasks import *
 from django.core import serializers
 import json
+import pickle
 
 
 def change_password(request):
@@ -283,15 +284,41 @@ def bid(request):
 
 def notify(request):
     user = request.user
-    notifications = Notification.objects
     response = {}
     response['msg'] = []
-    for e in Notification.objects.filter(userid=user.id, isread=False):
-        e.isread = True
-        e.save()
-        response['msg'].append(e.message)
+    for e in Notification.objects.filter(userid=user.id):
+        #e.isread = True
+        #e.save()
+        response['msg'].append({"notification":e.message,"isread":e.isread})
     return JsonResponse(response)
 
+def readnotify(request):
+    user = request.user
+    response = {}
+    #response['msg'] = []
+    for e in Notification.objects.filter(userid=user.id,isread=False):
+        e.isread = True
+        e.save()
+        #response['msg'].append({"notification":e.message,"isread":e.isread})
+    return JsonResponse(response)
+
+def getUserItems(request):
+    user = request.user
+    response = {}
+    response['msg'] = []
+    #for item in Item.objects.filter(Q(owner=user.username) | Q(newowner=user.username)):
+        #response['msg'].append(item)
+    for item in (Item.objects.filter(Q(owner=user.username) | Q(newowner=user.username)).values()):
+        response['msg'].append(item)
+    return JsonResponse(response)
+
+def getMarketItems(request):
+    user = request.user
+    response = {}
+    response['msg'] = []
+    for item in (Item.objects.filter(state="active").exclude(owner=user.username).values()):
+        response['msg'].append(item)
+    return JsonResponse(response)
 
 def watch(request):
     body = request.POST

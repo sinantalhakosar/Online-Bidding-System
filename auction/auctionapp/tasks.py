@@ -6,6 +6,7 @@ from .models import *
 
 @background()
 def notify_user(user_id, item_type=None):
+    print("Watch added for user:",user_id, " with item type:",item_type)
     user = User.objects.get(id=user_id)
     if (item_type is None):
         pipeline = [{"$match": {"operationType": "insert"}}]
@@ -26,6 +27,7 @@ def notify_user(user_id, item_type=None):
 
 @background()
 def notify_user_item(user_id, item_id):
+    print("Watch added for user:",user_id, " with item id:",item_id)
     user = User.objects.get(id=user_id)
     item = Item.objects.get(id=item_id)
     pipeline = [{"$match": {"operationType": "update",
@@ -44,6 +46,7 @@ def notify_user_item(user_id, item_id):
 
 @background
 def decrementer(item_id):
+    print("decrementer with item id:",item_id)
     item = Item.objects.get(id=item_id)
     if(item.state == "active"):
         item.decremented -= item.delta

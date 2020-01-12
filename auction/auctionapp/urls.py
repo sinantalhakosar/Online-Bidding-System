@@ -14,10 +14,12 @@ urlpatterns = [
     path('addbalance/', views.addbalance, name="addbalance"),
     path('bid/', views.bid, name="bid"),
     path('notify/', views.notify, name="notify"),
+    path('readnotify/', views.readnotify, name="readnotify"),
     path('watch/', views.watch, name="watch"),
     path('watchselected/', views.watchselected, name="watchselected"),
     path('history/', views.history, name="history"),
     path('report/', views.report, name="report"),
+    path('getUserItems/', views.getUserItems, name="getUserItems"),
+    path('getMarketItems/', views.getMarketItems, name="getMarketItems"),
     url(r'^password/$', views.change_password, name='change_password'),
-
 ]
